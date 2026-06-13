@@ -7,14 +7,14 @@
 <style>
 /* === 护眼主题变量 === */
 :root {
-    --bg-base: #F5F5F7; --bg-panel: #FFFFFF; --bg-hover: #FAFAFC;
-    --text-main: #33333E; --text-sub: #7A7A8C; --accent: #D48806;
-    --accent-light: #FFF8E1; --border: #EAEAEA; --shadow: 0 8px 30px rgba(0,0,0,0.04);
+--bg-base: #F5F5F7; --bg-panel: #FFFFFF; --bg-hover: #FAFAFC;
+--text-main: #33333E; --text-sub: #7A7A8C; --accent: #D48806;
+--accent-light: #FFF8E1; --border: #EAEAEA; --shadow: 0 8px 30px rgba(0,0,0,0.04);
 }
 [data-theme="dark"] {
-    --bg-base: #0F0F13; --bg-panel: #16161A; --bg-hover: #1D1D24;
-    --text-main: #D1D1E0; --text-sub: #76768A; --accent: #FF4D6D;
-    --accent-light: #3B1B22; --border: #262632; --shadow: 0 8px 40px rgba(255, 77, 109, 0.08);
+--bg-base: #0F0F13; --bg-panel: #16161A; --bg-hover: #1D1D24;
+--text-main: #D1D1E0; --text-sub: #76768A; --accent: #FF4D6D;
+--accent-light: #3B1B22; --border: #262632; --shadow: 0 8px 40px rgba(255, 77, 109, 0.08);
 }
 
 /* === 全局无滑块、防压扁布局 === */
@@ -36,25 +36,33 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; flex-
 .brand { font-size: 20px; font-weight: 900; margin-bottom: 40px; padding: 0 12px; display: flex; align-items: center; gap: 10px; }
 .brand i { color: var(--accent); font-size: 24px; transition: color 0.6s; }
 .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.tab-btn { padding: 14px 16px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: bold; color: var(--text-sub); transition: all 0.3s; }
-.tab-btn:hover { background: var(--bg-hover); color: var(--text-main); }
-.tab-btn.active { background: var(--accent-light); color: var(--accent); }
+.nav-item { padding: 14px 16px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: bold; color: var(--text-sub); transition: all 0.3s; }
+.nav-item:hover { background: var(--bg-hover); color: var(--text-main); }
+.nav-item.active { background: var(--accent-light); color: var(--accent); }
 .theme-btn { margin-top: auto; padding: 14px; border-radius: 12px; background: var(--bg-hover); border: 1px solid var(--border); color: var(--text-main); font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.6s; }
 
 /* === 右侧主内容区 === */
 .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 .top-bar { height: 70px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-panel); transition: all 0.6s; position: sticky; top: 0; z-index: 5; }
 .breadcrumb { font-size: 16px; font-weight: bold; color: var(--text-sub); display: flex; align-items: center; gap: 8px; }
+.crumb-link { cursor: pointer; transition: color 0.3s; }
+.crumb-link:hover { color: var(--accent); }
 .breadcrumb span.current { color: var(--text-main); cursor: default; }
 
+.actions { display: flex; gap: 12px; }
 .view-area { flex: 1; padding: 40px; }
-.tab-content { display: none; animation: fadeIn 0.4s ease; }
-.tab-content.active { display: block; }
+.view-layer { display: none; animation: fadeIn 0.4s ease; }
+.view-layer.active { display: block; }
 
 /* === UI 组件 === */
 .card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 32px; box-shadow: var(--shadow); transition: all 0.6s; margin-bottom: 24px; }
 .btn-primary { background: var(--accent); color: #fff; border: none; padding: 16px 32px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+.btn-outline { background: transparent; color: var(--text-sub); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+.btn-outline:hover { background: var(--bg-hover); color: var(--text-main); border-color: var(--text-main); }
+.btn-outline.accent { color: var(--accent); border-color: var(--accent); }
+.btn-outline.accent:hover { background: var(--accent-light); }
+.tag { background: var(--accent-light); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-right: 8px; display: inline-block; transition: all 0.6s; }
 
 /* 详情页专用排版 */
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
@@ -75,308 +83,384 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; flex-
 .rule-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 .rule-surface { font-weight: bold; font-size: 16px; color: var(--text-main); margin-bottom: 8px; }
 .rule-hidden { font-size: 15px; color: var(--accent); font-style: italic; background: var(--accent-light); padding: 12px; border-radius: 8px; }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
 <script type="module">
-  function populateCharacterData() {
-    if (typeof getAllVariables !== 'function' || typeof _ === 'undefined') return;
-    const all_variables = getAllVariables();
+function populateCharacterData() {
+if (typeof getAllVariables !== 'function' || typeof _ === 'undefined') return;
+const all_variables = getAllVariables();
 
-    /* 大厅 */
-    $("#大厅-标_表").text(_.get(all_variables, 'stat_data.大厅.标_表', '等待雷达扫描...'));
-    $("#大厅-标_里").text(_.get(all_variables, 'stat_data.大厅.标_里', '等待猎物定位...'));
-    $("#大厅-简_表").text(_.get(all_variables, 'stat_data.大厅.简_表', '系统正在接收表层悬赏简述...'));
-    $("#大厅-简_里").text(_.get(all_variables, 'stat_data.大厅.简_里', '系统正在解析里层真实诉求...'));
-    $("#大厅-签_表").text(_.join(_.get(all_variables, 'stat_data.大厅.签_表', []), ' | '));
-    $("#大厅-签_里").text(_.join(_.get(all_variables, 'stat_data.大厅.签_里', []), ' | '));
+/* 大厅 */
+$("#m-title-light").text(_.get(all_variables, 'stat_data.大厅.标_表', '等待雷达扫描...'));
+$("#m-title-dark").text(_.get(all_variables, 'stat_data.大厅.标_里', '等待猎物定位...'));
+$("#m-desc-light").text(_.get(all_variables, 'stat_data.大厅.简_表', '系统正在接收表层悬赏简述...'));
+$("#m-desc-dark").text(_.get(all_variables, 'stat_data.大厅.简_里', '系统正在解析里层真实诉求...'));
 
-    /* 画像 */
-    $("#画像-人名_表").text(_.get(all_variables, 'stat_data.画像.人名_表', '未知'));
-    $("#画像-人名_里").text(_.get(all_variables, 'stat_data.画像.人名_里', '未知'));
-    $("#画像-性格_表").text(_.get(all_variables, 'stat_data.画像.性格_表', '未知'));
-    $("#画像-性格_里").text(_.get(all_variables, 'stat_data.画像.性格_里', '未知'));
-    $("#画像-参_表").text(_.get(all_variables, 'stat_data.画像.参_表', '-'));
-    $("#画像-参_里").text(_.get(all_variables, 'stat_data.画像.参_里', '-'));
-    $("#画像-装_表").text(_.get(all_variables, 'stat_data.画像.装_表', '-'));
-    $("#画像-装_里").text(_.get(all_variables, 'stat_data.画像.装_里', '-'));
+let tagsLight = _.get(all_variables, 'stat_data.大厅.签_表', []);
+if (Array.isArray(tagsLight)) {
+$("#m-tags-light").html(tagsLight.map(t => <span class="tag mode-light">${t}</span>).join(''));
+}
+let tagsDark = _.get(all_variables, 'stat_data.大厅.签_里', []);
+if (Array.isArray(tagsDark)) {
+$("#m-tags-dark").html(tagsDark.map(t => <span class="tag mode-dark">${t}</span>).join(''));
+}
 
-    /* 环境 */
-    $("#环境-布_表").text(_.get(all_variables, 'stat_data.环境.布_表', '-'));
-    $("#环境-死_里").text(_.get(all_variables, 'stat_data.环境.死_里', '-'));
-    $("#环境-流_表").text(_.get(all_variables, 'stat_data.环境.流_表', '-'));
-    $("#环境-噪_里").text(_.get(all_variables, 'stat_data.环境.噪_里', '-'));
+/* 画像 */
+$("#p-name-light").text(_.get(all_variables, 'stat_data.画像.人名_表', '未知'));
+$("#p-name-dark").text(_.get(all_variables, 'stat_data.画像.人名_里', '未知'));
+$("#p-char-light").text(_.get(all_variables, 'stat_data.画像.性格_表', '未知'));
+$("#p-char-dark").text(_.get(all_variables, 'stat_data.画像.性格_里', '未知'));
+$("#p-base-light").text(_.get(all_variables, 'stat_data.画像.参_表', '-'));
+$("#p-base-dark").text(_.get(all_variables, 'stat_data.画像.参_里', '-'));
+$("#p-dress-light").text(_.get(all_variables, 'stat_data.画像.装_表', '-'));
+$("#p-dress-dark").text(_.get(all_variables, 'stat_data.画像.装_里', '-'));
 
-    /* 规则 */
-    $("#规则-0-表").text(_.get(all_variables, 'stat_data.规则.0.表', '--'));
-    $("#规则-0-里").text(_.get(all_variables, 'stat_data.规则.0.里', '--'));
-    $("#规则-1-表").text(_.get(all_variables, 'stat_data.规则.1.表', '--'));
-    $("#规则-1-里").text(_.get(all_variables, 'stat_data.规则.1.里', '--'));
-    $("#规则-2-表").text(_.get(all_variables, 'stat_data.规则.2.表', '--'));
-    $("#规则-2-里").text(_.get(all_variables, 'stat_data.规则.2.里', '--'));
-    $("#规则-3-表").text(_.get(all_variables, 'stat_data.规则.3.表', '--'));
-    $("#规则-3-里").text(_.get(all_variables, 'stat_data.规则.3.里', '--'));
-    $("#规则-4-表").text(_.get(all_variables, 'stat_data.规则.4.表', '--'));
-    $("#规则-4-里").text(_.get(all_variables, 'stat_data.规则.4.里', '--'));
+/* 环境 */
+$("#e-layout-light").text(_.get(all_variables, 'stat_data.环境.布_表', '-'));
+$("#e-deadzone-dark").text(_.get(all_variables, 'stat_data.环境.死_里', '-'));
+$("#e-flow-light").text(_.get(all_variables, 'stat_data.环境.流_表', '-'));
+$("#e-noise-dark").text(_.get(all_variables, 'stat_data.环境.噪_里', '-'));
 
-    /* 监控 */
-    $("#监控-状态_表").text(_.get(all_variables, 'stat_data.监控.状态_表', '等待接入'));
-    $("#监控-状态_里").text(_.get(all_variables, 'stat_data.监控.状态_里', '等待截获'));
-    $("#监控-心率_表").text(_.get(all_variables, 'stat_data.监控.心率_表', 0));
-    $("#监控-心率_里").text(_.get(all_variables, 'stat_data.监控.心率_里', 0));
-    $("#监控-心率说明_表").text(_.get(all_variables, 'stat_data.监控.心率说明_表', '等待数据...'));
-    $("#监控-心率说明_里").text(_.get(all_variables, 'stat_data.监控.心率说明_里', '等待数据...'));
-    $("#监控-行为_表").text(_.get(all_variables, 'stat_data.监控.行为_表', '-'));
-    $("#监控-行为_里").text(_.get(all_variables, 'stat_data.监控.行为_里', '-'));
-    $("#监控-行为说明_表").text(_.get(all_variables, 'stat_data.监控.行为说明_表', '等待数据...'));
-    $("#监控-行为说明_里").text(_.get(all_variables, 'stat_data.监控.行为说明_里', '等待数据...'));
-  }
+/* 规则动态渲染 */
+let rulesHtml = '';
+for (let i = 0; i < 5; i++) {
+let ruleBiao = _.get(all_variables, stat_data.规则.${i}.表, '--');
+let ruleLi = _.get(all_variables, stat_data.规则.${i}.里, '--');
+rulesHtml +=
+<div class="rule-item">
+<div class="rule-surface">规则${i+1}：${ruleBiao}</div>
+<div class="rule-hidden mode-dark">暗地指令：${ruleLi}</div>
+</div>;
+}
+$("#rules-container").html(rulesHtml);
 
-  // UI 交互先绑定，不依赖变量加载
-  $(document).ready(function() {
-    $(".tab-btn[data-target]").on("click", function () {
-      const target = $(this).data("target");
-      if(!$(this).hasClass('dir-btn')) {
-        $(".tab-btn[data-target]").removeClass("active");
-        $(this).addClass("active");
-      }
-      $(".tab-content").removeClass("active");
-      $("#" + target).addClass("active");
-    });
+/* 监控 */
+$("#mon-status-light").text(_.get(all_variables, 'stat_data.监控.状态_表', '等待接入'));
+$("#mon-status-dark").text(_.get(all_variables, 'stat_data.监控.状态_里', '等待截获'));
+$("#mon-hr-light").text(_.get(all_variables, 'stat_data.监控.心率_表', 0));
+$("#mon-hr-dark").text(_.get(all_variables, 'stat_data.监控.心率_里', 0));
+$("#mon-hr-desc-light").text(_.get(all_variables, 'stat_data.监控.心率说明_表', '等待数据...'));
+$("#mon-hr-desc-dark").text(_.get(all_variables, 'stat_data.监控.心率说明_里', '等待数据...'));
+$("#mon-bhv-light").text(_.get(all_variables, 'stat_data.监控.行为_表', '-'));
+$("#mon-bhv-dark").text(_.get(all_variables, 'stat_data.监控.行为_里', '-'));
+$("#mon-bhv-desc-light").text(_.get(all_variables, 'stat_data.监控.行为说明_表', '等待数据...'));
+$("#mon-bhv-desc-dark").text(_.get(all_variables, 'stat_data.监控.行为说明_里', '等待数据...'));
+}
 
-    $("#themeToggleBtn").on("click", function() {
-      const body = $("body");
-      if (body.attr("data-theme") === "light") {
-        body.attr("data-theme", "dark");
-      } else {
-        body.attr("data-theme", "light");
-      }
-    });
-  });
+function navigateTo(targetId, title) {
+$(".view-layer").removeClass("active");
+$("#" + targetId).addClass("active");
 
-  // MVU 变量系统异步加载
-  async function initMvu() {
-    try {
-      await waitGlobalInitialized('Mvu');
-      populateCharacterData();
-      eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {
-        populateCharacterData();
-      });
-    } catch (e) {
-      console.warn("MVU未就绪", e);
-    }
-  }
+// 侧边栏状态
+$(".nav-item").removeClass("active");
+if(targetId === 'layer-monitor') {
+$("#nav-monitor").addClass("active");
+} else {
+$("#nav-market").addClass("active");
+}
 
-  if (typeof errorCatched === 'function') {
-    $(errorCatched(initMvu));
-  } else {
-    $(initMvu);
-  }
+const $breadcrumb = $("#breadcrumb");
+const $refreshBtn = $("#refreshBtn");
+const $backBtn = $("#backBtn");
+
+// 顶部栏与返回逻辑
+if(targetId === 'layer-market') {
+$breadcrumb.html(<span class="current">悬赏大厅</span>);
+$refreshBtn.show();
+$backBtn.hide().data("target", "");
+} else if(targetId === 'layer-directory') {
+$breadcrumb.html(<span class="crumb-link" data-target="layer-market">悬赏大厅</span> / <span class="current">订单目录</span>);
+$refreshBtn.hide();
+$backBtn.show().data("target", "layer-market");
+} else if(targetId === 'layer-monitor') {
+$breadcrumb.html(<span class="current">服务监控</span>);
+$refreshBtn.hide();
+$backBtn.hide();
+} else {
+$breadcrumb.html(<span class="crumb-link" data-target="layer-market">悬赏大厅</span> / <span class="crumb-link" data-target="layer-directory">订单目录</span> / <span class="current">${title}</span>);
+$refreshBtn.hide();
+$backBtn.show().data("target", "layer-directory");
+}
+}
+
+$(document).ready(function() {
+// 导航绑定
+$(document).on("click", ".nav-btn", function() {
+navigateTo($(this).data("target"), $(this).data("title"));
+});
+$(document).on("click", ".crumb-link, #backBtn", function() {
+const target = $(this).data("target");
+if(target) navigateTo(target);
+});
+
+// 主题切换
+$("#themeToggleBtn").on("click", function() {
+const body = $("body");
+if (body.attr("data-theme") === "light") {
+body.attr("data-theme", "dark");
+} else {
+body.attr("data-theme", "light");
+}
+});
+
+// 刷新订单按钮逻辑
+$("#refreshBtn").on("click", function() {
+const copyText = "【系统指令】刷新订单。请随机抽取1种新的【越界策略/性格变体】与场景，无视并覆盖之前的锁定要求，重新生成大厅、画像、环境、规则的所有前置变量。";
+navigator.clipboard.writeText(copyText).then(() => {
+const $btn = $(this);
+const $icon = $btn.find("i");
+const $textLight = $btn.find("span.mode-light");
+const $textDark = $btn.find("span.mode-dark");
+
+$icon.addClass('spin');
+$textLight.text("已复制指令");
+$textDark.text("已复制指令");
+
+setTimeout(() => {
+$icon.removeClass('spin');
+$textLight.text("刷新订单");
+$textDark.text("重新扫描");
+}, 2000);
+});
+});
+
+// 签订契约按钮逻辑 (仅复制指令)
+$("#signContractBtn").on("click", function() {
+const copyText = "【系统指令】我已确认签订契约。同频实战正式开始。请严格锁定前置设定的变量（大厅、画像、环境、规则），接下来仅根据剧情实时更新【监控】分类下的动态变量。请开始第一轮的「环境施压」「肢体侍弄」与「脑内频道」描写。";
+navigator.clipboard.writeText(copyText).then(() => {
+const $btn = $(this);
+const $icon = $btn.find("i");
+const $textLight = $btn.find("span.mode-light");
+const $textDark = $btn.find("span.mode-dark");
+
+const originalIcon = $icon.attr("class");
+
+$icon.attr("class", "fas fa-check");
+$textLight.text("指令已复制，请发送给终端");
+$textDark.text("指令已复制，请发送给终端");
+
+setTimeout(() => {
+$icon.attr("class", originalIcon);
+$textLight.text("我已阅读并签署契约");
+$textDark.text("确认法则，建立同频实战");
+}, 2000);
+});
+});
+});
+
+// MVU 变量系统异步加载
+async function initMvu() {
+try {
+await waitGlobalInitialized('Mvu');
+populateCharacterData();
+eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {
+populateCharacterData();
+});
+} catch (e) {
+console.warn("MVU未就绪", e);
+}
+}
+
+if (typeof errorCatched === 'function') {
+$(errorCatched(initMvu));
+} else {
+$(initMvu);
+}
 </script>
 </head>
 <body data-theme="light">
 
 <aside class="sidebar">
-    <div class="brand">
-        <i class="mode-light fas fa-leaf"></i><i class="mode-dark fas fa-eye"></i>
-        <span class="mode-light">知己终端</span><span class="mode-dark">同频中枢</span>
-    </div>
-    <div class="nav-menu">
-        <div class="tab-btn active" data-target="layer-market">
-            <i class="fas fa-list-alt"></i><span class="mode-light">悬赏大厅</span><span class="mode-dark">猎物雷达</span>
-        </div>
-        <div class="tab-btn" data-target="layer-monitor">
-            <i class="fas fa-desktop"></i><span class="mode-light">服务监控</span><span class="mode-dark">实况截获</span>
-        </div>
-    </div>
-    <button class="theme-btn" id="themeToggleBtn">
-        <i class="mode-light fas fa-moon"></i><span class="mode-light">切换共犯视角</span>
-        <i class="mode-dark fas fa-sun"></i><span class="mode-dark">恢复社交伪装</span>
-    </button>
+<div class="brand">
+<i class="mode-light fas fa-leaf"></i><i class="mode-dark fas fa-eye"></i>
+<span class="mode-light">知己终端</span><span class="mode-dark">同频中枢</span>
+</div>
+<div class="nav-menu">
+<div class="nav-item active nav-btn" id="nav-market" data-target="layer-market">
+<i class="fas fa-list-alt"></i><span class="mode-light">悬赏大厅</span><span class="mode-dark">猎物雷达</span>
+</div>
+<div class="nav-item nav-btn" id="nav-monitor" data-target="layer-monitor">
+<i class="fas fa-desktop"></i><span class="mode-light">服务监控</span><span class="mode-dark">实况截获</span>
+</div>
+</div>
+<button class="theme-btn" id="themeToggleBtn">
+<i class="mode-light fas fa-moon"></i><span class="mode-light">切换共犯视角</span>
+<i class="mode-dark fas fa-sun"></i><span class="mode-dark">恢复社交伪装</span>
+</button>
 </aside>
 
 <main class="main-content">
-    <div class="top-bar">
-        <div class="breadcrumb" id="breadcrumb">
-            <span class="current">终端服务系统</span>
-        </div>
-    </div>
+<div class="top-bar">
+<div class="breadcrumb" id="breadcrumb">
+<span class="current">悬赏大厅</span>
+</div>
+<div class="actions">
+<button class="btn-outline" id="backBtn" style="display: none;">
+<i class="fas fa-arrow-left"></i> 返回上一层
+</button>
+<button class="btn-outline accent" id="refreshBtn">
+<i class="fas fa-sync-alt"></i> <span class="mode-light">刷新订单</span><span class="mode-dark">重新扫描</span>
+</button>
+</div>
+</div>
 
-    <div class="view-area">
-        
-        <!-- 大厅 -->
-        <div class="tab-content active" id="layer-market">
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
-                <div class="card tab-btn" data-target="layer-directory" style="cursor: pointer; padding: 24px; grid-column: span 2;">
-                    <h2 style="margin-bottom: 12px;">
-                        <span class="mode-light" id="大厅-标_表">--</span>
-                        <span class="mode-dark" id="大厅-标_里">--</span>
-                    </h2>
-                    <div style="margin-bottom: 16px;">
-                        <span id="大厅-签_表" class="mode-light" style="color: var(--accent); font-weight: bold; font-size: 14px;"></span>
-                        <span id="大厅-签_里" class="mode-dark" style="color: var(--accent); font-weight: bold; font-size: 14px;"></span>
-                    </div>
-                    <p style="font-size: 14px; color: var(--text-sub);">
-                        <span class="mode-light" id="大厅-简_表">--</span>
-                        <span class="mode-dark" id="大厅-简_里">--</span>
-                    </p>
-                </div>
-            </div>
-        </div>
+<div class="view-area">
 
-        <!-- 目录页 -->
-        <div class="tab-content" id="layer-directory">
-            <div class="card">
-                <h2 style="margin-bottom: 24px;">档案中转站</h2>
-                <div class="dir-btn tab-btn" data-target="layer-profile">
-                    <h3><i class="fas fa-user-circle mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">完整雇主画像</span><span class="mode-dark">极密肉体病历</span></h3>
-                    <p><span class="mode-light">查看雇主的基础履历与着装规范。</span><span class="mode-dark">解密肉体参数与淫靡着装状态。</span></p>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-                <div class="dir-btn tab-btn" data-target="layer-env">
-                    <h3><i class="fas fa-map-marked-alt mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">现场环境评估</span><span class="mode-dark">高危刺激源勘测</span></h3>
-                    <p><span class="mode-light">查看平面布局与人员流动轨迹。</span><span class="mode-dark">排查视觉死角与噪音催情效应。</span></p>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-                <div class="dir-btn tab-btn" data-target="layer-contract">
-                    <h3><i class="fas fa-file-signature mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">完整服务契约</span><span class="mode-dark">主动献祭法则</span></h3>
-                    <p><span class="mode-light">阅读免责条款及行为规范。</span><span class="mode-dark">查阅明暗交织的发情规则怪谈。</span></p>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        </div>
+<!-- 【阶段一】大厅 -->
+<div class="view-layer active" id="layer-market">
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+<div class="card nav-btn" data-target="layer-directory" style="cursor: pointer; padding: 24px; grid-column: span 2;">
+<h2 style="margin-bottom: 12px;"><span class="mode-light" id="m-title-light">等待雷达扫描...</span><span class="mode-dark" id="m-title-dark">等待猎物定位...</span></h2>
+<div style="margin-bottom: 16px;">
+<span id="m-tags-light" class="mode-light"></span>
+<span id="m-tags-dark" class="mode-dark"></span>
+</div>
+<p style="font-size: 14px; color: var(--text-sub);">
+<span class="mode-light" id="m-desc-light">系统正在接收表层悬赏简述...</span>
+<span class="mode-dark" id="m-desc-dark">系统正在解析里层真实诉求...</span>
+</p>
+</div>
+</div>
+</div>
 
-        <!-- 画像 -->
-        <div class="tab-content" id="layer-profile">
-            <div class="card">
-                <h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-id-card"></i> <span class="mode-light">雇主身份履历</span><span class="mode-dark">猎物肉体底牌</span></h2>
-                <div class="detail-grid">
-                    <div class="detail-box">
-                        <div class="detail-title"><i class="fas fa-user"></i> <span class="mode-light">人名</span><span class="mode-dark">真实身份</span></div>
-                        <div class="detail-text">
-                            <span class="mode-light" id="画像-人名_表">--</span>
-                            <span class="mode-dark" id="画像-人名_里">--</span>
-                        </div>
-                    </div>
-                    <div class="detail-box">
-                        <div class="detail-title"><i class="fas fa-brain"></i> <span class="mode-light">性格</span><span class="mode-dark">隐藏本质</span></div>
-                        <div class="detail-text">
-                            <span class="mode-light" id="画像-性格_表">--</span>
-                            <span class="mode-dark" id="画像-性格_里">--</span>
-                        </div>
-                    </div>
-                    <div class="detail-box">
-                        <div class="detail-title"><i class="fas fa-ruler"></i> <span class="mode-light">基础参数</span><span class="mode-dark">肉体参数</span></div>
-                        <div class="detail-text">
-                            <span class="mode-light" id="画像-参_表">--</span>
-                            <span class="mode-dark" id="画像-参_里">--</span>
-                        </div>
-                    </div>
-                    <div class="detail-box">
-                        <div class="detail-title"><i class="fas fa-tshirt"></i> <span class="mode-light">着装规范</span><span class="mode-dark">内部衣着状态</span></div>
-                        <div class="detail-text">
-                            <span class="mode-light" id="画像-装_表">--</span>
-                            <span class="mode-dark" id="画像-装_里">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- 目录页 -->
+<div class="view-layer" id="layer-directory">
+<div class="card">
+<h2 style="margin-bottom: 24px;">档案中转站</h2>
+<div class="dir-btn nav-btn" data-target="layer-profile" data-title="雇主画像">
+<h3><i class="fas fa-user-circle mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">完整雇主画像</span><span class="mode-dark">极密肉体病历</span></h3>
+<p><span class="mode-light">查看雇主的基础履历与着装规范。</span><span class="mode-dark">解密肉体参数与淫靡着装状态。</span></p>
+<i class="fas fa-chevron-right"></i>
+</div>
+<div class="dir-btn nav-btn" data-target="layer-env" data-title="环境评估">
+<h3><i class="fas fa-map-marked-alt mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">现场环境评估</span><span class="mode-dark">高危刺激源勘测</span></h3>
+<p><span class="mode-light">查看平面布局与人员流动轨迹。</span><span class="mode-dark">排查视觉死角与噪音催情效应。</span></p>
+<i class="fas fa-chevron-right"></i>
+</div>
+<div class="dir-btn nav-btn" data-target="layer-contract" data-title="服务契约">
+<h3><i class="fas fa-file-signature mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">完整服务契约</span><span class="mode-dark">主动献祭法则</span></h3>
+<p><span class="mode-light">阅读免责条款及行为规范。</span><span class="mode-dark">查阅明暗交织的发情规则怪谈。</span></p>
+<i class="fas fa-chevron-right"></i>
+</div>
+</div>
+</div>
 
-        <!-- 环境 -->
-        <div class="tab-content" id="layer-env">
-            <div class="card">
-                <h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-map"></i> <span class="mode-light">环境评估</span><span class="mode-dark">高危刺激源分析</span></h2>
-                <div class="detail-grid">
-                    <div class="detail-box">
-                        <div class="detail-title"><i class="fas fa-building"></i> <span class="mode-light">平面布局</span><span class="mode-dark">视觉死角</span></div>
-                        <div class="detail-text">
-                            <span class="mode-light" id="环境-布_表">--</span>
-                            <span class="mode-dark" id="环境-死_里">--</span>
-                        </div>
-                    </div>
-                    <div class="detail-box">
-                        <div class="detail-title"><i class="fas fa-users"></i> <span class="mode-light">人员流动</span><span class="mode-dark">噪音催情效应</span></div>
-                        <div class="detail-text">
-                            <span class="mode-light" id="环境-流_表">--</span>
-                            <span class="mode-dark" id="环境-噪_里">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- 【阶段一】画像 -->
+<div class="view-layer" id="layer-profile">
+<div class="card">
+<h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-id-card"></i> <span class="mode-light">雇主身份履历</span><span class="mode-dark">猎物肉体底牌</span></h2>
+<div class="detail-grid">
+<div class="detail-box">
+<div class="detail-title"><i class="fas fa-user"></i> <span class="mode-light">人名</span><span class="mode-dark">真实身份</span></div>
+<div class="detail-text">
+<span class="mode-light" id="p-name-light">--</span>
+<span class="mode-dark" id="p-name-dark">--</span>
+</div>
+</div>
+<div class="detail-box">
+<div class="detail-title"><i class="fas fa-brain"></i> <span class="mode-light">性格</span><span class="mode-dark">隐藏本质</span></div>
+<div class="detail-text">
+<span class="mode-light" id="p-char-light">--</span>
+<span class="mode-dark" id="p-char-dark">--</span>
+</div>
+</div>
+<div class="detail-box">
+<div class="detail-title"><i class="fas fa-ruler"></i> <span class="mode-light">基础参数</span><span class="mode-dark">肉体参数</span></div>
+<div class="detail-text">
+<span class="mode-light" id="p-base-light">-</span>
+<span class="mode-dark" id="p-base-dark">-</span>
+</div>
+</div>
+<div class="detail-box">
+<div class="detail-title"><i class="fas fa-tshirt"></i> <span class="mode-light">着装规范</span><span class="mode-dark">内部衣着状态</span></div>
+<div class="detail-text">
+<span class="mode-light" id="p-dress-light">-</span>
+<span class="mode-dark" id="p-dress-dark">-</span>
+</div>
+</div>
+</div>
+</div>
+</div>
 
-        <!-- 规则 -->
-        <div class="tab-content" id="layer-contract">
-            <div class="card">
-                <h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-scroll"></i> <span class="mode-light">服务免责条款</span><span class="mode-dark">发情规则怪谈</span></h2>
-                
-                <div class="detail-box" style="margin-bottom: 30px;">
-                    <div class="rule-item">
-                        <div class="rule-surface">规则1：<span id="规则-0-表">--</span></div>
-                        <div class="rule-hidden mode-dark">暗地指令：<span id="规则-0-里">--</span></div>
-                    </div>
-                    <div class="rule-item">
-                        <div class="rule-surface">规则2：<span id="规则-1-表">--</span></div>
-                        <div class="rule-hidden mode-dark">暗地指令：<span id="规则-1-里">--</span></div>
-                    </div>
-                    <div class="rule-item">
-                        <div class="rule-surface">规则3：<span id="规则-2-表">--</span></div>
-                        <div class="rule-hidden mode-dark">暗地指令：<span id="规则-2-里">--</span></div>
-                    </div>
-                    <div class="rule-item">
-                        <div class="rule-surface">规则4：<span id="规则-3-表">--</span></div>
-                        <div class="rule-hidden mode-dark">暗地指令：<span id="规则-3-里">--</span></div>
-                    </div>
-                    <div class="rule-item">
-                        <div class="rule-surface">规则5：<span id="规则-4-表">--</span></div>
-                        <div class="rule-hidden mode-dark">暗地指令：<span id="规则-4-里">--</span></div>
-                    </div>
-                </div>
+<!-- 【阶段一】环境 -->
+<div class="view-layer" id="layer-env">
+<div class="card">
+<h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-map"></i> <span class="mode-light">环境评估</span><span class="mode-dark">高危刺激源分析</span></h2>
+<div class="detail-grid">
+<div class="detail-box">
+<div class="detail-title"><i class="fas fa-building"></i> <span class="mode-light">平面布局</span><span class="mode-dark">视觉死角</span></div>
+<div class="detail-text">
+<span class="mode-light" id="e-layout-light">-</span>
+<span class="mode-dark" id="e-deadzone-dark">-</span>
+</div>
+</div>
+<div class="detail-box">
+<div class="detail-title"><i class="fas fa-users"></i> <span class="mode-light">人员流动</span><span class="mode-dark">噪音催情效应</span></div>
+<div class="detail-text">
+<span class="mode-light" id="e-flow-light">-</span>
+<span class="mode-dark" id="e-noise-dark">-</span>
+</div>
+</div>
+</div>
+</div>
+</div>
 
-                <div style="text-align: center; margin-top: 40px;">
-                    <button class="btn-primary tab-btn" data-target="layer-monitor">
-                        <i class="fas fa-pen-nib"></i> 
-                        <span class="mode-light">我已阅读并签署契约</span>
-                        <span class="mode-dark">确认法则，建立同频实战</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+<!-- 【阶段一】规则 (动态生成) -->
+<div class="view-layer" id="layer-contract">
+<div class="card">
+<h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-scroll"></i> <span class="mode-light">服务免责条款</span><span class="mode-dark">发情规则怪谈</span></h2>
 
-        <!-- 监控台 -->
-        <div class="tab-content" id="layer-monitor">
-            <div class="card" style="text-align: center; padding: 40px 20px;">
-                <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 8px;">实时连接状态</div>
-                <h1 style="color: var(--accent); font-size: 32px; margin-bottom: 30px;">
-                    <span class="mode-light" id="监控-状态_表">--</span>
-                    <span class="mode-dark" id="监控-状态_里">--</span>
-                </h1>
-                
-                <div class="detail-grid" style="margin-top: 0; text-align: left;">
-                    <div class="detail-box">
-                        <div style="font-size: 14px; color: var(--text-sub);">心率监控</div>
-                        <div style="font-size: 36px; font-weight: 900; color: var(--text-main); margin: 10px 0;">
-                            <span class="mode-light" id="监控-心率_表">--</span><span class="mode-dark" id="监控-心率_里" style="color: var(--accent);">--</span> <span style="font-size: 16px; font-weight: normal;">bpm</span>
-                        </div>
-                        <div style="font-size: 13px; color: var(--text-sub);">
-                            <span class="mode-light" id="监控-心率说明_表">--</span>
-                            <span class="mode-dark" id="监控-心率说明_里">--</span>
-                        </div>
-                    </div>
-                    <div class="detail-box">
-                        <div style="font-size: 14px; color: var(--text-sub);">行为分析</div>
-                        <div style="font-size: 24px; font-weight: 900; color: var(--text-main); margin: 10px 0;">
-                            <span class="mode-light" id="监控-行为_表">--</span><span class="mode-dark" id="监控-行为_里" style="color: var(--accent);">--</span>
-                        </div>
-                        <div style="font-size: 13px; color: var(--text-sub);">
-                            <span class="mode-light" id="监控-行为说明_表">--</span>
-                            <span class="mode-dark" id="监控-行为说明_里">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="detail-box" style="margin-bottom: 30px;" id="rules-container">
+<div class="rule-item"><div class="rule-surface" style="color:#aaa;">等待规则加载...</div></div>
+</div>
 
-    </div>
+<div style="text-align: center; margin-top: 40px;">
+<button class="btn-primary" id="signContractBtn">
+<i class="fas fa-pen-nib"></i>
+<span class="mode-light">我已阅读并签署契约</span>
+<span class="mode-dark">确认法则，建立同频实战</span>
+</button>
+</div>
+</div>
+</div>
+
+<!-- 【阶段二】监控台 -->
+<div class="view-layer" id="layer-monitor">
+<div class="card" style="text-align: center; padding: 40px 20px;">
+<div style="font-size: 14px; color: var(--text-sub); margin-bottom: 8px;">实时连接状态</div>
+<h1 style="color: var(--accent); font-size: 32px; margin-bottom: 30px;">
+<span class="mode-light" id="mon-status-light">等待接入</span>
+<span class="mode-dark" id="mon-status-dark">等待截获</span>
+</h1>
+
+<div class="detail-grid" style="margin-top: 0; text-align: left;">
+<div class="detail-box">
+<div style="font-size: 14px; color: var(--text-sub);">心率监控</div>
+<div style="font-size: 36px; font-weight: 900; color: var(--text-main); margin: 10px 0;">
+<span class="mode-light" id="mon-hr-light">-</span><span class="mode-dark" id="mon-hr-dark" style="color: var(--accent);">-</span> <span style="font-size: 16px; font-weight: normal;">bpm</span>
+</div>
+<div style="font-size: 13px; color: var(--text-sub);">
+<span class="mode-light" id="mon-hr-desc-light">等待数据...</span>
+<span class="mode-dark" id="mon-hr-desc-dark">等待数据...</span>
+</div>
+</div>
+<div class="detail-box">
+<div style="font-size: 14px; color: var(--text-sub);">行为分析</div>
+<div style="font-size: 24px; font-weight: 900; color: var(--text-main); margin: 10px 0;">
+<span class="mode-light" id="mon-bhv-light">-</span><span class="mode-dark" id="mon-bhv-dark" style="color: var(--accent);">-</span>
+</div>
+<div style="font-size: 13px; color: var(--text-sub);">
+<span class="mode-light" id="mon-bhv-desc-light">等待数据...</span>
+<span class="mode-dark" id="mon-bhv-desc-dark">等待数据...</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
 </main>
 </body>
 </html>
