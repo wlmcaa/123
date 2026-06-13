@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沉沦同频 APP</title>
+<style>
+/* === 暗网列表页基础设置 === */
+body { margin: 0; background: transparent; display: flex; justify-content: center; }
+.dw-mobile-wrap {
+    width: 100%;
+    max-width: 420px;
+    height: 600px; /* 固定高度模拟手机 */
+    background: #0b0b0e;
+    border: 1px solid #331118;
+    border-radius: 20px;
+    overflow: hidden;
+    font-family: 'Microsoft YaHei', sans-serif;
+    color: #e0e0e0;
+    position: relative;
+    box-shadow: 0 0 25px rgba(255, 51, 102, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 顶部搜索栏 */
+.dw-top-header {
+    background: linear-gradient(180deg, #1f050b 0%, #0b0b0e 100%);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #4a0d18;
+}
+.dw-back-icon { font-size: 18px; color: #ff3366; margin-right: 12px; cursor: pointer; }
+.dw-search-box {
+    flex: 1;
+    background: #000;
+    border: 1px solid #ff3366;
+    border-radius: 20px;
+    padding: 6px 15px;
+    color: #ff6b81;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    box-shadow: inset 0 0 8px rgba(255, 51, 102, 0.2);
+}
+
+/* 筛选条件栏 */
+.dw-filter-bar {
+    display: flex;
+    background: #111115;
+    padding: 10px 15px;
+    border-bottom: 1px solid #222;
+    overflow-x: auto;
+}
+.dw-filter-item {
+    font-size: 13px;
+    color: #888;
+    margin-right: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.3s;
+}
+.dw-filter-active {
+    color: #ff3366;
+    font-weight: bold;
+    position: relative;
+}
+.dw-filter-active::after {
+    content: '';
+    position: absolute;
+    bottom: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 15px;
+    height: 2px;
+    background: #ff3366;
+}
+
+/* 猎物列表区 */
+.dw-list-container {
+    padding: 15px;
+    flex: 1;
+    overflow-y: auto;
+    transition: opacity 0.3s ease;
+}
+
+/* 单个卡片 */
+.dw-card {
+    display: flex;
+    background: #111115;
+    border: 1px solid #331118;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 15px;
+    transition: all 0.2s;
+}
+.dw-card:hover { background: #1a0509; border-color: #4a0d18; }
+.dw-avatar {
+    width: 80px; height: 80px; background: #1f050b; border-radius: 8px;
+    border: 1px solid #4a0d18; display: flex; align-items: center;
+    justify-content: center; font-size: 28px; flex-shrink: 0;
+}
+.dw-info { margin-left: 12px; flex: 1; }
+.dw-name { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; }
+.dw-stats { font-size: 11px; color: #aaa; margin-bottom: 6px; display: flex; gap: 10px; }
+.dw-stat-hl { color: #ff3366; }
+.dw-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.dw-tag { background: #4a0d18; color: #ffb3c6; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+.dw-tag-warn { background: #2b0000; border: 1px solid #ff0000; color: #ff3333; }
+.dw-desc { font-size: 12px; color: #777; line-height: 1.4; margin-bottom: 8px; }
+.dw-action-btn {
+    background: #ff3366; color: #fff; padding: 6px 14px; border-radius: 15px;
+    font-size: 12px; font-weight: bold; cursor: pointer;
+}
+
+/* 底部导航栏 */
+.dw-bottom-nav {
+    display: flex; justify-content: space-around; background: #000;
+    border-top: 1px solid #331118; padding: 10px 0; font-size: 12px;
+}
+.dw-nav-item { color: #666; text-align: center; cursor: pointer; transition: color 0.2s;}
+.dw-nav-active { color: #ff3366; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="dw-mobile-wrap">
+    <!-- 顶部 -->
+    <div class="dw-top-header">
+        <div class="dw-back-icon">❮</div>
+        <div class="dw-search-box"><span>🔍 检索：高危场景 / 熟人 / 路人</span></div>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="dw-filter-bar" id="filterBar">
+        <div class="dw-filter-item dw-filter-active">背德优先</div>
+        <div class="dw-filter-item">暴露风险</div>
+        <div class="dw-filter-item">沦陷进度</div>
+        <div class="dw-filter-item">距离最近</div>
+    </div>
+
+    <!-- 列表区 -->
+    <div class="dw-list-container" id="listContainer">
+        <!-- 卡片 1 -->
+        <div class="dw-card">
+            <div class="dw-avatar">🩸</div>
+            <div class="dw-info">
+                <div class="dw-name">端庄上司 - 陆雪</div>
+                <div class="dw-stats"><span>理智防线: <span class="dw-stat-hl">崩溃边缘</span></span></div>
+                <div class="dw-tags"><span class="dw-tag">熟人</span><span class="dw-tag-warn">老公同行</span></div>
+                <div class="dw-desc">表面正在和丈夫挑选领带，大腿根却在发抖。</div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 14px; color: #ff3366; font-weight: bold;">同频消耗: 388</span>
+                    <div class="dw-action-btn">强制同频</div>
+                </div>
+            </div>
+        </div>
+        <!-- 卡片 2 -->
+        <div class="dw-card">
+            <div class="dw-avatar">👁️</div>
+            <div class="dw-info">
+                <div class="dw-name">晚高峰少女 - 林婉</div>
+                <div class="dw-stats"><span>理智防线: <span class="dw-stat-hl">已被突破</span></span></div>
+                <div class="dw-tags"><span class="dw-tag">路人</span><span class="dw-tag-warn">密闭车厢</span></div>
+                <div class="dw-desc">被人群挤在车门死角，死死咬着嘴唇不敢出声。</div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 14px; color: #ff3366; font-weight: bold;">同频消耗: 199</span>
+                    <div class="dw-action-btn">强制同频</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="dw-bottom-nav">
+        <div class="dw-nav-item dw-nav-active"><div style="font-size: 18px;">👁️</div>大厅</div>
+        <div class="dw-nav-item"><div style="font-size: 18px;">🔗</div>记录</div>
+        <div class="dw-nav-item"><div style="font-size: 18px;">🩸</div>权限</div>
+    </div>
+</div>
+
+<script>
+    // 简单的标签切换与列表刷新动画逻辑
+    const filters = document.querySelectorAll('.dw-filter-item');
+    const listContainer = document.getElementById('listContainer');
+
+    filters.forEach(item => {
+        item.addEventListener('click', function() {
+            // 移除所有高亮
+            filters.forEach(el => el.classList.remove('dw-filter-active'));
+            // 给当前点击的加上高亮
+            this.classList.add('dw-filter-active');
+            
+            // 列表闪烁动画，模拟加载数据
+            listContainer.style.opacity = 0;
+            setTimeout(() => {
+                // 这里把列表顺序倒一下，假装数据更新了
+                for (let i = listContainer.children.length; i >= 0; i--) {
+                    listContainer.appendChild(listContainer.children[Math.random() * i | 0]);
+                }
+                listContainer.style.opacity = 1;
+            }, 300);
+        });
+    });
+</script>
+</body>
+</html>
