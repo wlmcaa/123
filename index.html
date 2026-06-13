@@ -2,252 +2,312 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>沉沦同频 APP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>知己 Companion / 沉沦同频</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* === 暗网列表页基础设置 === */
-body { margin: 0; background: transparent; display: flex; justify-content: center; }
-.dw-mobile-wrap {
-    width: 100%;
-    max-width: 420px;
-    height: 600px; 
-    background: #0b0b0e;
-    border: 1px solid #331118;
-    border-radius: 20px;
+/* === 基础变量与主题 === */
+:root {
+    /* 亮色模式 (社交伪装) */
+    --bg-primary: #f8f9fa;
+    --bg-header: #ffffff;
+    --bg-card: #ffffff;
+    --text-main: #2c3e50;
+    --text-sub: #7f8c8d;
+    --accent-color: #FFC300;
+    --accent-gradient: linear-gradient(135deg, #FFC300 0%, #FF9500 100%);
+    --shadow: 0 4px 16px rgba(0,0,0,0.08);
+    --border: #eeeeee;
+    --tag-bg: #fff9e6;
+    --tag-text: #e6a800;
+}
+
+[data-theme="dark"] {
+    /* 暗色模式 (共犯解码) */
+    --bg-primary: #0b0b0e;
+    --bg-header: #15151a;
+    --bg-card: #1a1a24;
+    --text-main: #e0e0e0;
+    --text-sub: #888899;
+    --accent-color: #ff3366;
+    --accent-gradient: linear-gradient(135deg, #ff3366 0%, #b30033 100%);
+    --shadow: 0 4px 20px rgba(255, 51, 102, 0.15);
+    --border: #2a2a35;
+    --tag-bg: #331118;
+    --tag-text: #ffb3c6;
+}
+
+/* === 全局样式 === */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+body { 
+    background: transparent; 
+    display: flex; 
+    justify-content: center; 
+    padding: 15px 0; /* 电脑端上下留白防贴边 */
+}
+
+/* 手机壳容器 */
+.app-container {
+    width: 100%; 
+    max-width: 420px; 
+    height: 650px; /* 固定高度，完美适配酒馆气泡和电脑端 */
+    background: var(--bg-primary); 
+    color: var(--text-main);
+    display: flex; 
+    flex-direction: column; 
+    position: relative;
+    transition: background 0.3s ease, color 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+    border-radius: 16px; 
     overflow: hidden;
-    font-family: 'Microsoft YaHei', sans-serif;
-    color: #e0e0e0;
-    position: relative;
-    box-shadow: 0 0 25px rgba(255, 51, 102, 0.15);
-    display: flex;
-    flex-direction: column;
+    border: 1px solid var(--border);
 }
 
-/* 顶部搜索栏 */
-.dw-top-header {
-    background: linear-gradient(180deg, #1f050b 0%, #0b0b0e 100%);
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #4a0d18;
+/* === 表里世界切换核心 CSS === */
+.mode-dark { display: none; }
+[data-theme="dark"] .mode-light { display: none; }
+[data-theme="dark"] .mode-dark { display: inline-block; }
+[data-theme="dark"] div.mode-dark { display: block; }
+[data-theme="dark"] span.mode-dark { display: inline; }
+
+/* === 头部 === */
+.header {
+    padding: 20px 16px 15px; background: var(--bg-header); display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); transition: all 0.3s ease; flex-shrink: 0;
 }
-.dw-back-icon { font-size: 18px; color: #ff3366; margin-right: 12px; cursor: pointer; }
-.dw-search-box {
-    flex: 1;
-    background: #000;
-    border: 1px solid #ff3366;
-    border-radius: 20px;
-    padding: 6px 15px;
-    color: #ff6b81;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    box-shadow: inset 0 0 8px rgba(255, 51, 102, 0.2);
+.header-title { font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+.header-title i { color: var(--accent-color); }
+.theme-toggle {
+    background: var(--tag-bg); color: var(--accent-color); border: none; padding: 8px 12px;
+    border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s ease;
+    display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow);
 }
 
-/* 筛选条件栏 */
-.dw-filter-bar {
-    display: flex;
-    background: #111115;
-    padding: 10px 15px;
-    border-bottom: 1px solid #222;
-    overflow-x: auto;
-    transition: opacity 0.3s;
-}
-.dw-filter-item {
-    font-size: 13px;
-    color: #888;
-    margin-right: 20px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: color 0.3s;
-}
-.dw-filter-active {
-    color: #ff3366;
-    font-weight: bold;
-    position: relative;
-}
-.dw-filter-active::after {
-    content: '';
-    position: absolute;
-    bottom: -11px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 15px;
-    height: 2px;
-    background: #ff3366;
-}
+/* === 视图区域 === */
+.view-container { flex: 1; overflow-y: auto; padding: 16px; scrollbar-width: none; }
+.view-container::-webkit-scrollbar { display: none; }
+.view { display: none; animation: fadeIn 0.3s ease; }
+.view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* 猎物列表区 */
-.dw-list-container {
-    padding: 15px;
-    flex: 1;
-    overflow-y: auto;
-    transition: opacity 0.3s ease;
-}
+/* === 通用卡片 === */
+.card { background: var(--bg-card); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: all 0.3s ease; }
+.card-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.card-title i { color: var(--accent-color); }
 
-/* 单个卡片 */
-.dw-card {
-    display: flex;
-    background: #111115;
-    border: 1px solid #331118;
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 15px;
-    transition: all 0.2s;
-}
-.dw-card:hover { background: #1a0509; border-color: #4a0d18; }
-.dw-avatar {
-    width: 80px; height: 80px; background: #1f050b; border-radius: 8px;
-    border: 1px solid #4a0d18; display: flex; align-items: center;
-    justify-content: center; font-size: 28px; flex-shrink: 0;
-}
-.dw-info { margin-left: 12px; flex: 1; }
-.dw-name { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; }
-.dw-stats { font-size: 11px; color: #aaa; margin-bottom: 6px; display: flex; gap: 10px; }
-.dw-stat-hl { color: #ff3366; }
-.dw-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
-.dw-tag { background: #4a0d18; color: #ffb3c6; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
-.dw-tag-warn { background: #2b0000; border: 1px solid #ff0000; color: #ff3333; }
-.dw-desc { font-size: 12px; color: #777; line-height: 1.4; margin-bottom: 8px; }
-.dw-action-btn {
-    background: #ff3366; color: #fff; padding: 6px 14px; border-radius: 15px;
-    font-size: 12px; font-weight: bold; cursor: pointer;
-}
+/* === 首页特有 === */
+.slogan-box { text-align: center; padding: 20px 0; }
+.slogan-title { font-size: 24px; font-weight: 900; background: var(--accent-gradient); -webkit-background-clip: text; color: transparent; margin-bottom: 8px; }
+.slogan-sub { font-size: 14px; color: var(--text-sub); }
+.grid-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.grid-item { text-align: center; cursor: pointer; }
+.grid-icon { width: 50px; height: 50px; border-radius: 16px; background: var(--tag-bg); color: var(--accent-color); font-size: 20px; display: flex; justify-content: center; align-items: center; margin: 0 auto 8px; transition: all 0.3s ease; }
+.grid-item span { font-size: 12px; font-weight: 600; }
 
-/* 底部导航栏 */
-.dw-bottom-nav {
-    display: flex; justify-content: space-around; background: #000;
-    border-top: 1px solid #331118; padding: 10px 0; font-size: 12px;
-}
-.dw-nav-item { color: #666; text-align: center; cursor: pointer; transition: color 0.2s;}
-.dw-nav-active { color: #ff3366; font-weight: bold; text-shadow: 0 0 8px rgba(255, 51, 102, 0.6); }
+/* === 标签与订单 === */
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.tag { background: var(--tag-bg); color: var(--tag-text); font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+.order-desc { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+.action-btn { width: 100%; background: var(--accent-gradient); color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; }
+
+/* === 监控台特有 === */
+.dashboard-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+.metric-box { background: var(--bg-primary); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+.metric-val { font-size: 20px; font-weight: 900; color: var(--accent-color); margin-top: 4px; }
+.log-box { background: var(--bg-primary); border-left: 4px solid var(--accent-color); padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6; margin-bottom: 12px; }
+
+/* === 底部导航 === */
+.bottom-nav { display: flex; background: var(--bg-header); border-top: 1px solid var(--border); padding: 10px 0; flex-shrink: 0; }
+.nav-item { flex: 1; text-align: center; color: var(--text-sub); font-size: 12px; cursor: pointer; transition: all 0.3s; }
+.nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
+.nav-item.active { color: var(--accent-color); font-weight: bold; }
 </style>
 </head>
-<body>
+<body data-theme="light">
 
-<div class="dw-mobile-wrap">
-    <!-- 顶部 -->
-    <div class="dw-top-header">
-        <div class="dw-back-icon">❮</div>
-        <div class="dw-search-box"><span>🔍 检索：高危场景 / 熟人 / 路人</span></div>
+<div class="app-container">
+    <!-- 头部 & 切换开关 -->
+    <div class="header">
+        <div class="header-title">
+            <i class="mode-light fas fa-leaf"></i><span class="mode-light">知己 Companion</span>
+            <i class="mode-dark fas fa-eye"></i><span class="mode-dark">沉沦同频</span>
+        </div>
+        <button class="theme-toggle" id="themeToggleBtn">
+            <i class="mode-light fas fa-sun"></i><span class="mode-light">社交伪装</span>
+            <i class="mode-dark fas fa-moon"></i><span class="mode-dark">共犯解码</span>
+        </button>
     </div>
 
-    <!-- 筛选栏 -->
-    <div class="dw-filter-bar" id="filterBar">
-        <div class="dw-filter-item dw-filter-active">背德优先</div>
-        <div class="dw-filter-item">暴露风险</div>
-        <div class="dw-filter-item">沦陷进度</div>
-        <div class="dw-filter-item">距离最近</div>
-    </div>
+    <!-- 视图区域 -->
+    <div class="view-container">
+        
+        <!-- 1. 首页视图 -->
+        <div class="view active" id="view-home">
+            <div class="slogan-box">
+                <div class="slogan-title mode-light">知己陪伴 共同成长</div>
+                <div class="slogan-title mode-dark">撕下伪装 主动献祭</div>
+                <div class="slogan-sub mode-light">为您匹配最优质的场景陪伴服务</div>
+                <div class="slogan-sub mode-dark">截获她压抑不住的隐秘侍弄欲...</div>
+            </div>
 
-    <!-- 列表区 -->
-    <div class="dw-list-container" id="listContainer">
-        <!-- 卡片 1 -->
-        <div class="dw-card">
-            <div class="dw-avatar">🩸</div>
-            <div class="dw-info">
-                <div class="dw-name">端庄上司 - 陆雪</div>
-                <div class="dw-stats"><span>理智防线: <span class="dw-stat-hl">崩溃边缘</span></span></div>
-                <div class="dw-tags"><span class="dw-tag">熟人</span><span class="dw-tag-warn">老公同行</span></div>
-                <div class="dw-desc">表面正在和丈夫挑选领带，大腿根却在发抖。</div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 14px; color: #ff3366; font-weight: bold;">同频消耗: 388</span>
-                    <div class="dw-action-btn">强制同频</div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-th-large"></i> 服务专区</div>
+                <div class="grid-menu">
+                    <div class="grid-item">
+                        <div class="grid-icon"><i class="fas fa-book-reader mode-light"></i><i class="fas fa-user-ninja mode-dark"></i></div>
+                        <span class="mode-light">陪看书</span><span class="mode-dark">视觉死角</span>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon"><i class="fas fa-subway mode-light"></i><i class="fas fa-water mode-dark"></i></div>
+                        <span class="mode-light">同行陪伴</span><span class="mode-dark">高压密闭</span>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon"><i class="fas fa-glass-cheers mode-light"></i><i class="fas fa-temperature-high mode-dark"></i></div>
+                        <span class="mode-light">晚宴女伴</span><span class="mode-dark">极度温差</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- 卡片 2 -->
-        <div class="dw-card">
-            <div class="dw-avatar">👁️</div>
-            <div class="dw-info">
-                <div class="dw-name">晚高峰少女 - 林婉</div>
-                <div class="dw-stats"><span>理智防线: <span class="dw-stat-hl">已被突破</span></span></div>
-                <div class="dw-tags"><span class="dw-tag">路人</span><span class="dw-tag-warn">密闭车厢</span></div>
-                <div class="dw-desc">被人群挤在车门死角，死死咬着嘴唇不敢出声。</div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 14px; color: #ff3366; font-weight: bold;">同频消耗: 199</span>
-                    <div class="dw-action-btn">强制同频</div>
+
+        <!-- 2. 发现/订单接头视图 -->
+        <div class="view" id="view-discover">
+            <div class="card">
+                <div class="card-title">
+                    <i class="mode-light fas fa-map-marker-alt"></i><span class="mode-light"> 推荐订单</span>
+                    <i class="mode-dark fas fa-crosshairs"></i><span class="mode-dark"> 目标截获</span>
+                </div>
+                
+                <div class="tag-list">
+                    <span class="tag mode-light">保持安静</span>
+                    <span class="tag mode-light">全神贯注</span>
+                    <span class="tag mode-dark">隐忍型</span>
+                    <span class="tag mode-dark">极度紧绷</span>
+                    <span class="tag mode-dark">主动榨取</span>
+                </div>
+                
+                <h3 style="margin-bottom: 8px;">
+                    <span class="mode-light">市图书馆沉浸式共学</span>
+                    <span class="mode-dark">长桌下的隐忍者</span>
+                </h3>
+                
+                <div class="order-desc mode-light">
+                    希望找个安静的同伴在市图书馆一起复习，绝对专注，互不干扰，共同营造良好的学习氛围。
+                </div>
+                <div class="order-desc mode-dark">
+                    特意挑选了人流密集的中央长桌。企图利用桌布掩护，在强装镇定看书的同时，跨坐上来主动吞咽。环境越安静，她吞吐的动作就越发专注且黏腻，试图用极致的侍弄来宣泄随时会被发现的慌乱。
+                </div>
+                
+                <button class="action-btn" onclick="switchView('view-service')">
+                    <span class="mode-light">接受预约</span>
+                    <span class="mode-dark">建立同频</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. 服务/监控台视图 -->
+        <div class="view" id="view-service">
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 4px;">当前状态</div>
+                <h2 style="color: var(--accent-color); margin-bottom: 16px;">
+                    <span class="mode-light">专注阅读中</span>
+                    <span class="mode-dark">理智摇摇欲坠</span>
+                </h2>
+                
+                <div class="dashboard-metrics">
+                    <div class="metric-box">
+                        <div style="font-size: 12px; color: var(--text-sub);">
+                            <span class="mode-light">心率平稳</span><span class="mode-dark">真实心率</span>
+                        </div>
+                        <div class="metric-val"><span class="mode-light">72</span><span class="mode-dark">142</span> <span style="font-size: 12px;">bpm</span></div>
+                    </div>
+                    <div class="metric-box">
+                        <div style="font-size: 12px; color: var(--text-sub);">
+                            <span class="mode-light">专注度</span><span class="mode-dark">侍弄状态</span>
+                        </div>
+                        <div class="metric-val" style="font-size: 16px; margin-top: 8px;">
+                            <span class="mode-light">98%</span><span class="mode-dark">极度淫靡</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="mode-light fas fa-tshirt"></i><span class="mode-light"> 现场纪实</span>
+                    <i class="mode-dark fas fa-video"></i><span class="mode-dark"> 越界实况</span>
+                </div>
+                <div class="log-box mode-light">
+                    得体的学院风百褶裙与白衬衫，坐姿端正。一直在认真做笔记，偶尔抬头确认周围的学习氛围。
+                </div>
+                <div class="log-box mode-dark">
+                    路人的脚步声越近，她的腰肢扭动得越发疯狂黏腻。她死死咬住下唇不让自己出声，只能把所有的慌乱转化成下体不断收缩绞紧的力道，拼命榨取着你。
+                </div>
+
+                <div class="card-title" style="margin-top: 16px;">
+                    <i class="mode-light fas fa-comment-dots"></i><span class="mode-light"> 交流反馈</span>
+                    <i class="mode-dark fas fa-brain"></i><span class="mode-dark"> 脑波截获</span>
+                </div>
+                <div class="log-box mode-light" style="font-style: italic;">
+                    “这道题的解法很巧妙，谢谢你的指导，感觉效率提高了不少。”
+                </div>
+                <div class="log-box mode-dark" style="font-style: italic; color: #ff80ab;">
+                    “哈啊……有人走过来了……好刺激……请继续享受我的侍奉……就在这里把我填满吧……”
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- 底部导航 -->
-    <div class="dw-bottom-nav">
-        <div class="dw-nav-item dw-nav-active" data-index="0"><div style="font-size: 18px;">👁️</div>大厅</div>
-        <div class="dw-nav-item" data-index="1"><div style="font-size: 18px;">🔗</div>记录</div>
-        <div class="dw-nav-item" data-index="2"><div style="font-size: 18px;">🩸</div>权限</div>
+    <div class="bottom-nav">
+        <div class="nav-item active" data-target="view-home">
+            <i class="fas fa-home"></i><span class="mode-light">首页</span><span class="mode-dark">大厅</span>
+        </div>
+        <div class="nav-item" data-target="view-discover">
+            <i class="fas fa-compass"></i><span class="mode-light">发现</span><span class="mode-dark">截获</span>
+        </div>
+        <div class="nav-item" data-target="view-service">
+            <i class="fas fa-chart-bar"></i><span class="mode-light">进度</span><span class="mode-dark">监控</span>
+        </div>
     </div>
 </div>
 
 <script>
-    const filters = document.querySelectorAll('.dw-filter-item');
-    const navItems = document.querySelectorAll('.dw-nav-item');
-    const listContainer = document.getElementById('listContainer');
-    const filterBar = document.getElementById('filterBar');
+    // 切换亮/暗色模式逻辑
+    const body = document.body;
+    const themeBtn = document.getElementById('themeToggleBtn');
     
-    // 缓存大厅的 HTML 内容，方便切回来
-    const hallContent = listContainer.innerHTML;
-
-    // 顶部标签切换逻辑
-    filters.forEach(item => {
-        item.addEventListener('click', function() {
-            filters.forEach(el => el.classList.remove('dw-filter-active'));
-            this.classList.add('dw-filter-active');
-            
-            listContainer.style.opacity = 0;
-            setTimeout(() => {
-                for (let i = listContainer.children.length; i >= 0; i--) {
-                    listContainer.appendChild(listContainer.children[Math.random() * i | 0]);
-                }
-                listContainer.style.opacity = 1;
-            }, 300);
-        });
+    themeBtn.addEventListener('click', () => {
+        if (body.getAttribute('data-theme') === 'light') {
+            body.setAttribute('data-theme', 'dark');
+        } else {
+            body.setAttribute('data-theme', 'light');
+        }
     });
 
     // 底部导航切换逻辑
+    const navItems = document.querySelectorAll('.nav-item');
+    const views = document.querySelectorAll('.view');
+
+    function switchView(targetId) {
+        // 隐藏所有视图
+        views.forEach(view => view.classList.remove('active'));
+        // 移除所有导航高亮
+        navItems.forEach(nav => nav.classList.remove('active'));
+        
+        // 显示目标视图
+        document.getElementById(targetId).classList.add('active');
+        // 高亮对应导航
+        document.querySelector(`.nav-item[data-target="${targetId}"]`).classList.add('active');
+    }
+
     navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // 切换高亮
-            navItems.forEach(el => el.classList.remove('dw-nav-active'));
-            this.classList.add('dw-nav-active');
-
-            const index = this.getAttribute('data-index');
-            
-            // 渐隐动画
-            listContainer.style.opacity = 0;
-            if (index !== "0") filterBar.style.opacity = 0;
-
-            setTimeout(() => {
-                if (index === "0") {
-                    // 切回大厅
-                    filterBar.style.display = 'flex';
-                    filterBar.style.opacity = 1;
-                    listContainer.innerHTML = hallContent;
-                } else if (index === "1") {
-                    // 记录页
-                    filterBar.style.display = 'none';
-                    listContainer.innerHTML = `
-                        <div style="text-align:center; padding-top:60px; color:#555;">
-                            <div style="font-size:40px; margin-bottom:10px;">📭</div>
-                            <div>暂无同频记录...</div>
-                            <div style="font-size:12px; margin-top:5px;">等待猎物彻底沦陷</div>
-                        </div>`;
-                } else if (index === "2") {
-                    // 权限页
-                    filterBar.style.display = 'none';
-                    listContainer.innerHTML = `
-                        <div style="text-align:center; padding-top:60px; color:#ff3366;">
-                            <div style="font-size:40px; margin-bottom:10px;">⚠️</div>
-                            <div style="font-weight:bold;">[ 权限等级：观察者 ]</div>
-                            <div style="font-size:12px; color:#666; margin-top:5px;">深渊高级功能未解锁，请继续积累同频消耗。</div>
-                        </div>`;
-                }
-                listContainer.style.opacity = 1;
-            }, 300);
+        item.addEventListener('click', () => {
+            const target = item.getAttribute('data-target');
+            switchView(target);
         });
     });
 </script>
+
 </body>
 </html>
