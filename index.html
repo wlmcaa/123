@@ -78,6 +78,7 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; flex-
 </style>
 <script type="module">
   function populateCharacterData() {
+    if (typeof getAllVariables !== 'function' || typeof _ === 'undefined') return;
     const all_variables = getAllVariables();
 
     /* 大厅 */
@@ -129,14 +130,8 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; flex-
     $("#监控-行为说明_里").text(_.get(all_variables, 'stat_data.监控.行为说明_里', '等待数据...'));
   }
 
-  async function init() {
-    await waitGlobalInitialized('Mvu');
-    populateCharacterData();
-
-    eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {
-      populateCharacterData();
-    });
-
+  // UI 交互先绑定，不依赖变量加载
+  $(document).ready(function() {
     $(".tab-btn[data-target]").on("click", function () {
       const target = $(this).data("target");
       if(!$(this).hasClass('dir-btn')) {
@@ -155,9 +150,26 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; flex-
         body.attr("data-theme", "light");
       }
     });
+  });
+
+  // MVU 变量系统异步加载
+  async function initMvu() {
+    try {
+      await waitGlobalInitialized('Mvu');
+      populateCharacterData();
+      eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {
+        populateCharacterData();
+      });
+    } catch (e) {
+      console.warn("MVU未就绪", e);
+    }
   }
 
-  $(errorCatched(init));
+  if (typeof errorCatched === 'function') {
+    $(errorCatched(initMvu));
+  } else {
+    $(initMvu);
+  }
 </script>
 </head>
 <body data-theme="light">
