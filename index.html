@@ -1,93 +1,290 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>同频终端</title>
-    <style>
-        body { margin: 0; padding: 15px; background: #0d0d0d; color: #eee; font-family: sans-serif; overflow-y: auto; }
-        /* 频道切换按钮栏 */
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .tab-btn { background: #222; color: #888; border: 1px solid #444; padding: 5px 15px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
-        .tab-btn.active { background: #444; color: #fff; border-color: #666; }
-        .tab-btn:hover { background: #333; }
-        
-        /* 面板与文字样式 */
-        .panel { display: none; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; }
-        .panel.active { display: block; }
-        .mode-light { color: #88ccff; } /* 表层蓝 */
-        .mode-dark { color: #ff4466; }  /* 里层红 */
-        
-        /* 正文区 */
-        .reading-area { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #444; line-height: 1.6; }
-        .text-block { margin-bottom: 12px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知己终端 / 同频中枢</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* === 护眼主题变量 === */
+:root {
+    --bg-base: #F5F5F7; --bg-panel: #FFFFFF; --bg-hover: #FAFAFC;
+    --text-main: #33333E; --text-sub: #7A7A8C; --accent: #D48806;
+    --accent-light: #FFF8E1; --border: #EAEAEA; --shadow: 0 8px 30px rgba(0,0,0,0.04);
+}
+[data-theme="dark"] {
+    --bg-base: #0F0F13; --bg-panel: #16161A; --bg-hover: #1D1D24;
+    --text-main: #D1D1E0; --text-sub: #76768A; --accent: #FF4D6D;
+    --accent-light: #3B1B22; --border: #262632; --shadow: 0 8px 40px rgba(255, 77, 109, 0.08);
+}
+/* === 全局无滑块、防压扁布局 === */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', sans-serif; scrollbar-width: none; -ms-overflow-style: none; }
+::-webkit-scrollbar { display: none; }
+body { background: var(--bg-base); color: var(--text-main); display: flex; min-height: 100vh; transition: all 0.6s ease; }
+
+/* 显隐逻辑 */
+.mode-dark { display: none; }
+[data-theme="dark"] .mode-light { display: none; }
+[data-theme="dark"] .mode-dark { display: inline-block; animation: fadeIn 0.4s ease; }
+[data-theme="light"] .mode-light { display: inline-block; animation: fadeIn 0.4s ease; }
+[data-theme="dark"] div.mode-dark { display: block; }
+[data-theme="light"] div.mode-light { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* === 侧边栏与主内容 === */
+.sidebar { width: 260px; flex-shrink: 0; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; transition: all 0.6s ease; z-index: 10; }
+.brand { font-size: 20px; font-weight: 900; margin-bottom: 40px; padding: 0 12px; display: flex; align-items: center; gap: 10px; }
+.brand i { color: var(--accent); font-size: 24px; transition: color 0.6s; }
+.nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.nav-item { padding: 14px 16px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: bold; color: var(--text-sub); transition: all 0.3s; }
+.nav-item:hover { background: var(--bg-hover); color: var(--text-main); }
+.nav-item.active { background: var(--accent-light); color: var(--accent); }
+.theme-btn { margin-top: auto; padding: 14px; border-radius: 12px; background: var(--bg-hover); border: 1px solid var(--border); color: var(--text-main); font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.6s; }
+
+.main-content { flex: 1; display: flex; flex-direction: column; }
+.top-bar { height: 70px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-panel); position: sticky; top: 0; z-index: 5; }
+.breadcrumb { font-size: 16px; font-weight: bold; color: var(--text-sub); display: flex; align-items: center; gap: 8px; }
+.breadcrumb span { cursor: pointer; transition: color 0.3s; }
+.breadcrumb span:hover { color: var(--accent); }
+.breadcrumb span.current { color: var(--text-main); cursor: default; }
+.view-area { flex: 1; padding: 40px; }
+.view-layer { display: none; animation: fadeIn 0.4s ease; }
+.view-layer.active { display: block; }
+
+/* === UI 组件 === */
+.card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 32px; box-shadow: var(--shadow); transition: all 0.6s; margin-bottom: 24px; }
+.btn-primary { background: var(--accent); color: #fff; border: none; padding: 16px 32px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+.btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+.btn-outline:hover { background: var(--accent-light); }
+.tag { background: var(--accent-light); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-right: 8px; display: inline-block; }
+
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+.detail-box { background: var(--bg-hover); border-radius: 12px; padding: 24px; border-left: 4px solid var(--accent); transition: all 0.6s; line-height: 1.8; }
+.detail-title { font-size: 14px; color: var(--text-sub); margin-bottom: 12px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+.detail-text { font-size: 15px; }
+
+.dir-btn { display: block; width: 100%; text-align: left; background: var(--bg-hover); border: 1px solid var(--border); padding: 24px; border-radius: 12px; margin-bottom: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+.dir-btn:hover { border-color: var(--accent); transform: translateX(8px); }
+.dir-btn h3 { font-size: 18px; color: var(--text-main); margin-bottom: 8px; }
+.dir-btn p { font-size: 14px; color: var(--text-sub); }
+.dir-btn i.fa-chevron-right { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-size: 24px; color: var(--border); transition: all 0.3s; }
+.dir-btn:hover i.fa-chevron-right { color: var(--accent); right: 16px; }
+
+.rule-item { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed var(--border); }
+.rule-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.rule-surface { font-weight: bold; font-size: 16px; color: var(--text-main); margin-bottom: 8px; }
+.rule-hidden { font-size: 15px; color: var(--accent); font-style: italic; background: var(--accent-light); padding: 12px; border-radius: 8px; }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
 </head>
-<body>
+<body data-theme="light">
 
-    <!-- 频道切换按钮（测试点击交互） -->
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('market')">接单大厅</button>
-        <button class="tab-btn" onclick="switchTab('monitor')">实时监控</button>
+<aside class="sidebar">
+    <div class="brand">
+        <i class="mode-light fas fa-leaf"></i><i class="mode-dark fas fa-eye"></i>
+        <span class="mode-light">知己终端</span><span class="mode-dark">同频中枢</span>
     </div>
-
-    <!-- 刷单阶段 UI -->
-    <div id="layer-market" class="panel active">
-        <h3><span class="mode-light" id="m-title-light">等待刷新...</span> | <span class="mode-dark" id="m-title-dark">等待指令</span></h3>
-        <p style="color:#aaa;">画像：<span id="m-param-light">-</span> / <span id="m-param-dark" class="mode-dark">-</span></p>
+    <div class="nav-menu">
+        <div class="nav-item active" id="nav-market" onclick="navTo('layer-market', '悬赏大厅')">
+            <i class="fas fa-list-alt"></i><span class="mode-light">悬赏大厅</span><span class="mode-dark">猎物雷达</span>
+        </div>
+        <div class="nav-item" id="nav-monitor" onclick="navTo('layer-monitor', '服务监控')">
+            <i class="fas fa-desktop"></i><span class="mode-light">服务监控</span><span class="mode-dark">实况截获</span>
+        </div>
     </div>
+    <button class="theme-btn" id="themeToggleBtn">
+        <i class="mode-light fas fa-moon"></i><span class="mode-light">切换共犯视角</span>
+        <i class="mode-dark fas fa-sun"></i><span class="mode-dark">恢复社交伪装</span>
+    </button>
+</aside>
 
-    <!-- 实战阶段 UI -->
-    <div id="layer-monitor" class="panel">
-        <h4 style="margin:0 0 10px 0;">状态：<span id="mon-status">-</span></h4>
-        <p style="margin:0 0 10px 0; color:#aaa;">心率：<span id="mon-hr" class="mode-dark">-</span> bpm</p>
-        
-        <div class="reading-area">
-            <div class="text-block" style="color:#aaa;">【环境】<span id="text-env">等待同步...</span></div>
-            <div class="text-block" style="color:#ddd;">【肢体】<span id="text-body">等待同步...</span></div>
-            <div class="text-block mode-dark">【脑内】<span id="text-mind">等待同步...</span></div>
+<main class="main-content">
+    <div class="top-bar">
+        <div class="breadcrumb" id="breadcrumb"><span class="current">悬赏大厅</span></div>
+        <div class="actions">
+            <button class="btn-outline" id="refreshBtn" onclick="refreshRadar()">
+                <i class="fas fa-sync-alt"></i> <span class="mode-light">刷新订单</span><span class="mode-dark">重新扫描</span>
+            </button>
         </div>
     </div>
 
-    <script>
-        // 1. 手动切换频道的逻辑
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
-            
-            if(tabId === 'market') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('layer-market').classList.add('active');
+    <div class="view-area">
+        <!-- 层级1：大厅 -->
+        <div class="view-layer active" id="layer-market">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+                <div class="card" style="cursor: pointer; padding: 24px;" onclick="navTo('layer-directory', '订单档案目录')">
+                    <h2 style="margin-bottom: 12px;"><span class="mode-light" id="m-title-light">市图书馆共学陪伴</span><span class="mode-dark" id="m-title-dark">长桌下的隐忍者</span></h2>
+                    <div style="margin-bottom: 16px;">
+                        <span class="tag mode-light">高定客户</span><span class="tag mode-dark">高危环境</span>
+                    </div>
+                    <p style="font-size: 14px; color: var(--text-sub);">
+                        <span class="mode-light" id="m-desc-light">要求：保持绝对安静，禁止闲聊与肢体接触。</span>
+                        <span class="mode-dark" id="m-desc-dark">诉求：花重金买你在大庭广众下无视她，好让她在桌下毫无底线地榨取你。</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 层级2：档案目录页 (保持不变) -->
+        <div class="view-layer" id="layer-directory">
+            <div class="card">
+                <h2 style="margin-bottom: 24px;">档案中转站</h2>
+                <div class="dir-btn" onclick="navTo('layer-profile', '雇主画像')">
+                    <h3><i class="fas fa-user-circle mode-light" style="position:static; font-size:18px; margin-right:8px;"></i><span class="mode-light">完整雇主画像</span><span class="mode-dark">极密肉体病历</span></h3>
+                    <p><span class="mode-light">查看雇主的基础履历与着装。</span><span class="mode-dark">解密敏感带、病态成因与真实着装。</span></p>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <!-- 省略环境和契约入口内容，与你原版一致，保持简洁 -->
+                <div class="dir-btn" onclick="navTo('layer-contract', '服务契约')">
+                    <h3><i class="fas fa-file-signature mode-light" style="position:static; font-size:18px; margin-right:8px;"></i><span class="mode-light">完整服务契约</span><span class="mode-dark">主动献祭法则</span></h3>
+                    <p><span class="mode-light">阅读条款，确认后接单。</span><span class="mode-dark">查阅发情怪谈，确认签署即建立同频。</span></p>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 层级3A：画像 (绑定了数据ID) -->
+        <div class="view-layer" id="layer-profile">
+            <div class="card">
+                <h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-id-card"></i> <span class="mode-light">雇主身份履历</span><span class="mode-dark">猎物肉体底牌</span></h2>
+                <div class="detail-grid">
+                    <div class="detail-box">
+                        <div class="detail-title"><i class="fas fa-ruler"></i> <span class="mode-light">基础参数</span><span class="mode-dark">肉体参数</span></div>
+                        <div class="detail-text">
+                            <span class="mode-light" id="p-base-light">身高：168cm...等待数据</span>
+                            <span class="mode-dark" id="p-base-dark">三围：88-60-90...等待数据</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 层级3C：契约 -->
+        <div class="view-layer" id="layer-contract">
+            <div class="card">
+                <h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-scroll"></i> <span class="mode-light">服务免责条款</span><span class="mode-dark">发情规则怪谈</span></h2>
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-primary" onclick="acceptOrder()">
+                        <i class="fas fa-pen-nib"></i> 
+                        <span class="mode-light">我已阅读并签署契约</span><span class="mode-dark">确认法则，建立同频实战</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 层级4：监控台 (新增了正文阅读区) -->
+        <div class="view-layer" id="layer-monitor">
+            <div class="card" style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 8px;">实时连接状态</div>
+                <h1 style="color: var(--accent); font-size: 32px; margin-bottom: 30px;">
+                    <span class="mode-light" id="mon-status-light">等待连接...</span>
+                    <span class="mode-dark" id="mon-status-dark">等待截获...</span>
+                </h1>
+                
+                <div class="detail-grid" style="margin-top: 0; text-align: left;">
+                    <div class="detail-box">
+                        <div style="font-size: 14px; color: var(--text-sub);">心率监控</div>
+                        <div style="font-size: 36px; font-weight: 900; color: var(--text-main); margin: 10px 0;">
+                            <span class="mode-light" id="mon-hr-light">-</span>
+                            <span class="mode-dark" id="mon-hr-dark" style="color: var(--accent);">-</span> <span style="font-size: 16px; font-weight: normal;">bpm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 核心：正文阅读区 -->
+                <div class="detail-box" style="margin-top: 24px; text-align: left;">
+                    <div class="detail-title"><i class="fas fa-book-open"></i> <span class="mode-light">实况记录</span><span class="mode-dark">同频截获</span></div>
+                    <div style="margin-bottom: 16px; line-height: 1.8;">
+                        <div style="color: var(--text-sub); margin-bottom: 8px;">【环境】<span id="text-env">等待剧情推进...</span></div>
+                        <div style="color: var(--text-main); margin-bottom: 8px;">【肢体】<span id="text-body">等待剧情推进...</span></div>
+                        <div style="color: var(--accent); font-style: italic;">【脑内】<span id="text-mind">等待剧情推进...</span></div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    // 1. UI 交互逻辑
+    const body = document.body;
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+
+    const breadcrumb = document.getElementById('breadcrumb');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    function navTo(layerId, title) {
+        document.querySelectorAll('.view-layer').forEach(el => el.classList.remove('active'));
+        document.getElementById(layerId).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        if(layerId === 'layer-monitor') {
+            document.getElementById('nav-monitor').classList.add('active');
+            breadcrumb.innerHTML = `<span class="current">服务监控</span>`;
+            refreshBtn.style.display = 'none';
+        } else {
+            document.getElementById('nav-market').classList.add('active');
+            if(layerId === 'layer-market') {
+                breadcrumb.innerHTML = `<span class="current">悬赏大厅</span>`;
+                refreshBtn.style.display = 'inline-block';
+            } else if(layerId === 'layer-directory') {
+                breadcrumb.innerHTML = `<span onclick="navTo('layer-market', '悬赏大厅')">悬赏大厅</span> / <span class="current">订单目录</span>`;
+                refreshBtn.style.display = 'none';
             } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('layer-monitor').classList.add('active');
+                breadcrumb.innerHTML = `<span onclick="navTo('layer-market', '悬赏大厅')">悬赏大厅</span> / <span onclick="navTo('layer-directory', '订单目录')">订单目录</span> / <span class="current">${title}</span>`;
+                refreshBtn.style.display = 'none';
             }
         }
+    }
 
-        // 2. 接收酒馆传来的 JSON 数据
-        window.addEventListener('message', function(event) {
-            const json = event.data;
-            if (!json) return;
+    function refreshRadar() {
+        const icon = document.querySelector('#refreshBtn i');
+        icon.classList.add('spin');
+        setTimeout(() => { icon.classList.remove('spin'); }, 1000);
+    }
 
-            // 收到大厅数据 -> 渲染并自动切到大厅频道
-            if (json.大厅) {
-                document.getElementById('m-title-light').innerText = json.大厅.标_表 || '-';
-                document.getElementById('m-title-dark').innerText = json.大厅.标_里 || '-';
-                document.getElementById('m-param-light').innerText = json.画像?.参_表 || '-';
-                document.getElementById('m-param-dark').innerText = json.画像?.参_里 || '-';
-                switchTab('market');
-            } 
-            // 收到监控数据 -> 渲染并自动切到监控频道
-            else if (json.监控 && json.正文) {
-                document.getElementById('mon-status').innerText = `${json.监控.状态_表 || '-'} / ${json.监控.状态_里 || '-'}`;
-                document.getElementById('mon-hr').innerText = `${json.监控.心率_表 || '-'} (里:${json.监控.心率_里 || '-'})`;
-                
-                document.getElementById('text-env').innerText = json.正文.环境施压 || '';
-                document.getElementById('text-body').innerText = json.正文.肢体侍弄 || '';
-                document.getElementById('text-mind').innerText = json.正文.脑内频道 || '';
-                switchTab('monitor');
+    function acceptOrder() {
+        navTo('layer-monitor', '服务监控');
+        alert("同频已建立！请在酒馆聊天框发送指令推进剧情。");
+    }
+
+    // 2. 接收酒馆 JSON 数据逻辑
+    window.addEventListener('message', function(event) {
+        const json = event.data;
+        if (!json) return;
+
+        // 收到大厅数据
+        if (json.大厅) {
+            document.getElementById('m-title-light').innerText = json.大厅.标_表 || '未知订单';
+            document.getElementById('m-title-dark').innerText = json.大厅.标_里 || '未知猎物';
+            if (json.画像) {
+                document.getElementById('p-base-light').innerText = json.画像.参_表 || '';
+                document.getElementById('p-base-dark').innerText = json.画像.参_里 || '';
             }
-        });
-    </script>
+            navTo('layer-market', '悬赏大厅');
+        } 
+        // 收到监控正文数据
+        else if (json.监控 && json.正文) {
+            document.getElementById('mon-status-light').innerText = json.监控.状态_表 || '运行中';
+            document.getElementById('mon-status-dark').innerText = json.监控.状态_里 || '高压状态';
+            document.getElementById('mon-hr-light').innerText = json.监控.心率_表 || '-';
+            document.getElementById('mon-hr-dark').innerText = json.监控.心率_里 || '-';
+            
+            // 渲染正文
+            document.getElementById('text-env').innerText = json.正文.环境施压 || '';
+            document.getElementById('text-body').innerText = json.正文.肢体侍弄 || '';
+            document.getElementById('text-mind').innerText = json.正文.脑内频道 || '';
+            
+            navTo('layer-monitor', '服务监控');
+        }
+    });
+</script>
 </body>
 </html>
