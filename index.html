@@ -3,39 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>知己 Companion / 沉沦同频 监控终端</title>
+<title>知己终端 / 同频中枢</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 /* === 护眼主题变量 === */
 :root {
-    /* 亮色 (社交伪装) - 羊皮纸暖白 */
-    --bg-base: #F0F0F4;
+    --bg-base: #F5F5F7;
     --bg-panel: #FFFFFF;
-    --bg-hover: #F8F9FA;
+    --bg-hover: #FAFAFC;
     --text-main: #33333E;
     --text-sub: #7A7A8C;
     --accent: #D48806;
     --accent-light: #FFF8E1;
-    --border: #E5E5EB;
+    --border: #EAEAEA;
     --shadow: 0 8px 30px rgba(0,0,0,0.04);
 }
 
 [data-theme="dark"] {
-    /* 暗色 (共犯解码) - 深渊灰紫 */
-    --bg-base: #121216;
-    --bg-panel: #1A1A22;
-    --bg-hover: #22222C;
+    --bg-base: #0F0F13;
+    --bg-panel: #16161A;
+    --bg-hover: #1D1D24;
     --text-main: #D1D1E0;
-    --text-sub: #858599;
+    --text-sub: #76768A;
     --accent: #FF4D6D;
     --accent-light: #3B1B22;
-    --border: #2A2A35;
+    --border: #262632;
     --shadow: 0 8px 40px rgba(255, 77, 109, 0.08);
 }
 
-/* === 全局与大屏布局 === */
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', sans-serif; }
-body { background: var(--bg-base); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; transition: all 0.6s ease; }
+/* === 全局无滑块、防压扁布局 === */
+* { 
+    margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', sans-serif; 
+    scrollbar-width: none; -ms-overflow-style: none; 
+}
+::-webkit-scrollbar { display: none; }
+
+body { 
+    background: var(--bg-base); color: var(--text-main); 
+    display: flex; min-height: 100vh; transition: all 0.6s ease; 
+}
 
 /* 显隐逻辑 */
 .mode-dark { display: none; }
@@ -48,7 +54,11 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; heigh
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 /* === 左侧侧边栏 === */
-.sidebar { width: 260px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; transition: all 0.6s ease; z-index: 10; }
+.sidebar { 
+    width: 260px; flex-shrink: 0; background: var(--bg-panel); 
+    border-right: 1px solid var(--border); display: flex; flex-direction: column; 
+    padding: 24px 16px; transition: all 0.6s ease; z-index: 10; 
+}
 .brand { font-size: 20px; font-weight: 900; margin-bottom: 40px; padding: 0 12px; display: flex; align-items: center; gap: 10px; }
 .brand i { color: var(--accent); font-size: 24px; transition: color 0.6s; }
 .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
@@ -58,66 +68,62 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; heigh
 .theme-btn { margin-top: auto; padding: 14px; border-radius: 12px; background: var(--bg-hover); border: 1px solid var(--border); color: var(--text-main); font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.6s; }
 
 /* === 右侧主内容区 === */
-.main-content { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-.top-bar { height: 70px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-panel); transition: all 0.6s; }
+.main-content { flex: 1; display: flex; flex-direction: column; }
+.top-bar { height: 70px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-panel); transition: all 0.6s; position: sticky; top: 0; z-index: 5; }
 .breadcrumb { font-size: 16px; font-weight: bold; color: var(--text-sub); display: flex; align-items: center; gap: 8px; }
-.breadcrumb span.current { color: var(--text-main); }
-.view-area { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+.breadcrumb span { cursor: pointer; transition: color 0.3s; }
+.breadcrumb span:hover { color: var(--accent); }
+.breadcrumb span.current { color: var(--text-main); cursor: default; }
 
-/* === 视图层级控制 === */
+.view-area { flex: 1; padding: 40px; }
 .view-layer { display: none; animation: fadeIn 0.4s ease; }
 .view-layer.active { display: block; }
 
 /* === UI 组件 === */
-.card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); transition: all 0.6s; margin-bottom: 24px; }
-.btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+.card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 32px; box-shadow: var(--shadow); transition: all 0.6s; margin-bottom: 24px; }
+.btn-primary { background: var(--accent); color: #fff; border: none; padding: 16px 32px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
 .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
 .btn-outline:hover { background: var(--accent-light); }
-
-/* 标签与网格 */
 .tag { background: var(--accent-light); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-right: 8px; display: inline-block; transition: all 0.6s; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 
-/* 订单列表卡片 (第一层) */
-.order-card { cursor: pointer; border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: all 0.3s; background: var(--bg-panel); }
-.order-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow); }
-.order-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; }
+/* 详情页专用排版 */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+.detail-box { background: var(--bg-hover); border-radius: 12px; padding: 24px; border-left: 4px solid var(--accent); transition: all 0.6s; line-height: 1.8; }
+.detail-title { font-size: 14px; color: var(--text-sub); margin-bottom: 12px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+.detail-text { font-size: 15px; }
 
-/* Tab 导航 (第二层) */
-.tab-nav { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-.tab-btn { padding: 12px 24px; font-weight: bold; color: var(--text-sub); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-.tab-content { display: none; line-height: 1.8; color: var(--text-main); font-size: 15px; }
-.tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+/* 目录页大按钮 */
+.dir-btn { display: block; width: 100%; text-align: left; background: var(--bg-hover); border: 1px solid var(--border); padding: 24px; border-radius: 12px; margin-bottom: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+.dir-btn:hover { border-color: var(--accent); transform: translateX(8px); }
+.dir-btn h3 { font-size: 18px; color: var(--text-main); margin-bottom: 8px; }
+.dir-btn p { font-size: 14px; color: var(--text-sub); }
+.dir-btn i { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-size: 24px; color: var(--border); transition: all 0.3s; }
+.dir-btn:hover i { color: var(--accent); right: 16px; }
 
-/* 详细报告单 (第三层) */
-.report-section { background: var(--bg-hover); border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--accent); transition: all 0.6s; }
-.report-title { font-size: 14px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
-.report-data { font-size: 16px; font-weight: 500; }
+/* 规则怪谈排版 */
+.rule-item { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed var(--border); }
+.rule-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.rule-surface { font-weight: bold; font-size: 16px; color: var(--text-main); margin-bottom: 8px; }
+.rule-hidden { font-size: 15px; color: var(--accent); font-style: italic; background: var(--accent-light); padding: 12px; border-radius: 8px; }
 
-/* 刷新动画 */
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body data-theme="light">
 
-<!-- 左侧边栏 -->
 <aside class="sidebar">
     <div class="brand">
         <i class="mode-light fas fa-leaf"></i><i class="mode-dark fas fa-eye"></i>
         <span class="mode-light">知己终端</span><span class="mode-dark">同频中枢</span>
     </div>
     <div class="nav-menu">
-        <div class="nav-item active" onclick="navTo('layer-market')">
-            <i class="fas fa-list-alt"></i>
-            <span class="mode-light">悬赏大厅</span><span class="mode-dark">猎物雷达</span>
+        <div class="nav-item active" id="nav-market" onclick="navTo('layer-market', '悬赏大厅')">
+            <i class="fas fa-list-alt"></i><span class="mode-light">悬赏大厅</span><span class="mode-dark">猎物雷达</span>
         </div>
-        <div class="nav-item" onclick="alert('监控模块待激活')">
-            <i class="fas fa-desktop"></i>
-            <span class="mode-light">服务监控</span><span class="mode-dark">实况截获</span>
+        <div class="nav-item" id="nav-monitor" onclick="navTo('layer-monitor', '服务监控')">
+            <i class="fas fa-desktop"></i><span class="mode-light">服务监控</span><span class="mode-dark">实况截获</span>
         </div>
     </div>
     <button class="theme-btn" id="themeToggleBtn">
@@ -126,15 +132,12 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; heigh
     </button>
 </aside>
 
-<!-- 右侧主区 -->
 <main class="main-content">
     <div class="top-bar">
         <div class="breadcrumb" id="breadcrumb">
-            <span class="current mode-light">悬赏大厅</span>
-            <span class="current mode-dark">猎物雷达</span>
+            <span class="current">悬赏大厅</span>
         </div>
         <div class="actions">
-            <!-- 仅在第一层显示刷新按钮 -->
             <button class="btn-outline" id="refreshBtn" onclick="refreshRadar()">
                 <i class="fas fa-sync-alt"></i> <span class="mode-light">刷新订单</span><span class="mode-dark">重新扫描</span>
             </button>
@@ -143,107 +146,158 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; heigh
 
     <div class="view-area">
         
-        <!-- 第一层：订单列表 -->
+        <!-- 层级1：大厅 -->
         <div class="view-layer active" id="layer-market">
-            <div class="grid-3">
-                <!-- 订单卡片 1 -->
-                <div class="order-card" onclick="openOrderDetails()">
-                    <div class="order-title">
-                        <span class="mode-light">市图书馆共学陪伴</span>
-                        <span class="mode-dark">长桌下的隐忍者</span>
-                    </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+                <div class="card" style="cursor: pointer; padding: 24px;" onclick="navTo('layer-directory', '订单档案目录')">
+                    <h2 style="margin-bottom: 12px;"><span class="mode-light">市图书馆共学陪伴</span><span class="mode-dark">长桌下的隐忍者</span></h2>
                     <div style="margin-bottom: 16px;">
                         <span class="tag mode-light">黑钻客户</span><span class="tag mode-light">极度严苛</span>
                         <span class="tag mode-dark">高危环境</span><span class="tag mode-dark">主动献祭</span>
                     </div>
-                    <div style="font-size: 13px; color: var(--text-sub); line-height: 1.6;">
-                        <span class="mode-light">雇主要求：保持绝对安静，禁止闲聊与肢体接触，违者直接终止订单。</span>
-                        <span class="mode-dark">真实诉求：花重金买你在大庭广众下无视她，好让她在桌下毫无底线地榨取你。</span>
-                    </div>
-                </div>
-                <!-- 占位卡片 -->
-                <div class="order-card" style="opacity: 0.5;">
-                    <div class="order-title">高端晚宴男伴</div>
-                    <div style="font-size: 13px; color: var(--text-sub);">[其他悬赏加密中...]</div>
+                    <p style="font-size: 14px; color: var(--text-sub);">
+                        <span class="mode-light">要求：保持绝对安静，禁止闲聊与肢体接触，违者直接终止订单。</span>
+                        <span class="mode-dark">诉求：花重金买你在大庭广众下无视她，好让她在桌下毫无底线地榨取你。</span>
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- 第二层：订单基础档案 (带Tab) -->
-        <div class="view-layer" id="layer-detail">
+        <!-- 层级2：档案目录页 -->
+        <div class="view-layer" id="layer-directory">
             <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2>
-                        <span class="mode-light">悬赏档案：市图书馆共学</span>
-                        <span class="mode-dark">猎物锁定：长桌下的隐忍者</span>
-                    </h2>
-                    <button class="btn-outline" onclick="navTo('layer-market')">返回大厅</button>
+                <h2 style="margin-bottom: 24px;">档案中转站</h2>
+                
+                <div class="dir-btn" onclick="navTo('layer-profile', '雇主画像')">
+                    <h3><i class="fas fa-user-circle mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">完整雇主画像</span><span class="mode-dark">极密肉体病历</span></h3>
+                    <p><span class="mode-light">查看雇主的基础履历、性格特征与着装要求。</span><span class="mode-dark">解密她的三围、敏感带、病态心理成因与淫靡着装状态。</span></p>
+                    <i class="fas fa-chevron-right"></i>
                 </div>
 
-                <div class="tab-nav">
-                    <div class="tab-btn active" onclick="switchTab('tab-profile')">雇主画像</div>
-                    <div class="tab-btn" onclick="switchTab('tab-scene')">环境评估</div>
-                    <div class="tab-btn" onclick="switchTab('tab-terms')">服务契约</div>
+                <div class="dir-btn" onclick="navTo('layer-env', '环境评估')">
+                    <h3><i class="fas fa-map-marked-alt mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">现场环境评估</span><span class="mode-dark">高危刺激源勘测</span></h3>
+                    <p><span class="mode-light">查看图书馆平面图、人员流动轨迹与学习氛围评估。</span><span class="mode-dark">排查监控死角、同学行动轨迹及环境噪音对她阴道的刺激效应。</span></p>
+                    <i class="fas fa-chevron-right"></i>
                 </div>
 
-                <div class="tab-content active" id="tab-profile">
-                    <span class="mode-light">实名认证：法学院研二学生。完美主义者，对陪伴者的着装、谈吐有极高要求，履约记录100%极优。</span>
-                    <span class="mode-dark">背德成瘾者。常规性爱无法使其高潮，极度依赖“随时可能身败名裂”的紧绷感。</span>
+                <div class="dir-btn" onclick="navTo('layer-contract', '服务契约')">
+                    <h3><i class="fas fa-file-signature mode-light" style="position:static; font-size:18px; margin-right:8px; color:inherit;"></i><span class="mode-light">完整服务契约</span><span class="mode-dark">主动献祭法则</span></h3>
+                    <p><span class="mode-light">阅读免责条款及行为规范，确认后方可接单。</span><span class="mode-dark">查阅明暗交织的“发情规则怪谈”，确认签署即建立同频。</span></p>
+                    <i class="fas fa-chevron-right"></i>
                 </div>
-                <div class="tab-content" id="tab-scene">
-                    <span class="mode-light">市图书馆中庭。绝对安静，学习氛围浓厚，人员密集。</span>
-                    <span class="mode-dark">高危刺激源。对面坐着同班同学，巡馆员定时经过。脚步声是她的兴奋剂。</span>
+            </div>
+        </div>
+
+        <!-- 层级3A：画像 -->
+        <div class="view-layer" id="layer-profile">
+            <div class="card">
+                <h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-id-card"></i> <span class="mode-light">雇主身份履历</span><span class="mode-dark">猎物肉体底牌</span></h2>
+                <div class="detail-grid">
+                    <div class="detail-box">
+                        <div class="detail-title"><i class="fas fa-ruler"></i> <span class="mode-light">基础参数</span><span class="mode-dark">肉体参数</span></div>
+                        <div class="detail-text">
+                            <span class="mode-light">身高：168cm | 体重：52kg<br>社会身份：法学院研二学生，完美主义者，0差评雇主。<br>以往履历：从无逾矩行为，作风严谨。</span>
+                            <span class="mode-dark">三围：88-60-90 | 动情阈值：极低。<br>敏感带：大腿根部内侧（极易因摩擦产生痉挛）、后颈。<br>病态成因：长期维持完美人设导致重度压抑，必须依靠“随时身败名裂”的紧绷感才能高潮。</span>
+                        </div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-title"><i class="fas fa-tshirt"></i> <span class="mode-light">着装规范</span><span class="mode-dark">内部衣着状态</span></div>
+                        <div class="detail-text">
+                            <span class="mode-light">上半身：扣到最顶端的洁白衬衫。<br>下半身：得体的学院风百褶裙，黑色小腿袜。<br>状态：整洁干练，符合学术场所规范。</span>
+                            <span class="mode-dark">上半身：衬衫下未穿内衣，乳首因兴奋始终处于挺立状态。<br>下半身：百褶裙下【未穿内裤】。<br>状态：大腿根部已被淫液完全浸透，黏腻的汁水正顺着大腿内侧缓缓滴落在地毯上。</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="tab-content" id="tab-terms">
-                    <span class="mode-light">全程禁止闲聊，禁止任何肢体接触，违约不予结算。</span>
-                    <span class="mode-dark">主动献祭法则：未经指令绝不停止桌下的榨取。允许通过加重绞紧力道宣泄恐慌。</span>
+            </div>
+        </div>
+
+        <!-- 层级3B：环境 -->
+        <div class="view-layer" id="layer-env">
+            <div class="card">
+                <h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-map"></i> <span class="mode-light">学习环境评估</span><span class="mode-dark">高危刺激源分析</span></h2>
+                <div class="detail-grid">
+                    <div class="detail-box">
+                        <div class="detail-title"><i class="fas fa-building"></i> <span class="mode-light">平面布局</span><span class="mode-dark">视觉死角</span></div>
+                        <div class="detail-text">
+                            <span class="mode-light">市图书馆中庭，开阔明亮。<br>长桌宽1.2米，桌面整洁，学习资料摆放有序。</span>
+                            <span class="mode-dark">中庭长桌【没有下半身挡板】。<br>只要有人笔尖掉落弯腰，就能瞬间看到她在桌下含弄你下体的淫靡画面。这种极度暴露的死角是她的核心兴奋剂。</span>
+                        </div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-title"><i class="fas fa-users"></i> <span class="mode-light">人员流动</span><span class="mode-dark">噪音催情效应</span></div>
+                        <div class="detail-text">
+                            <span class="mode-light">正对面坐着同班同学。<br>巡馆员每15分钟从后方走道经过一次。<br>整体保持绝对安静。</span>
+                            <span class="mode-dark">同学翻书的声音、巡馆员靠近的脚步声，都会直接刺激她的神经。每当环境噪音响起，她的阴道壁就会不受控地产生剧烈收缩，并伴随大量的淫水喷涌。</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 层级3C：契约 (规则怪谈) -->
+        <div class="view-layer" id="layer-contract">
+            <div class="card">
+                <h2 style="margin-bottom: 24px; color: var(--accent);"><i class="fas fa-scroll"></i> <span class="mode-light">服务免责条款</span><span class="mode-dark">发情规则怪谈</span></h2>
+                
+                <div class="detail-box" style="margin-bottom: 30px;">
+                    <div class="rule-item">
+                        <div class="rule-surface">规则一：陪伴期间，你的双手必须始终放在桌面上，保持翻书姿势。</div>
+                        <div class="rule-hidden mode-dark">暗地指令：这是为了确保当她突然在桌下把你的性器深喉到根部时，你无法用手推开她的头，必须全部承受。</div>
+                    </div>
+                    <div class="rule-item">
+                        <div class="rule-surface">规则二：当巡馆员靠近时，必须保持绝对静止与沉默，不得发出任何声响。</div>
+                        <div class="rule-hidden mode-dark">暗地指令：巡馆员的脚步声会让她极度恐慌，此时她的含弄深度和绞紧力道会瞬间增加一倍。即便被爽到头皮发麻，你也绝不能出声安抚，必须冷脸承受她的榨取。</div>
+                    </div>
+                    <div class="rule-item">
+                        <div class="rule-surface">规则三：无论发生什么突发情况，未经雇主允许，绝不能主动中断服务离开座位。</div>
+                        <div class="rule-hidden mode-dark">暗地指令：一旦开始，她就是不知疲倦的母狗。哪怕她被呛出眼泪、生理性痉挛，只要她没喊停，你就必须心安理得地享受她违背伦理的侍弄。</div>
+                    </div>
                 </div>
 
-                <div style="margin-top: 30px; text-align: center;">
-                    <button class="btn-primary" onclick="openDeepReport()">
-                        <i class="fas fa-fingerprint"></i> 
-                        <span class="mode-light">查看完整背调报告</span>
-                        <span class="mode-dark">解密极密体检底牌</span>
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-primary" onclick="acceptOrder()">
+                        <i class="fas fa-pen-nib"></i> 
+                        <span class="mode-light">我已阅读并签署契约</span>
+                        <span class="mode-dark">确认法则，建立同频实战</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 第三层：极密详细报告 -->
-        <div class="view-layer" id="layer-report">
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 style="color: var(--accent);">
-                        <i class="fas fa-file-contract"></i> 
-                        <span class="mode-light">高净值客户详细背调</span>
-                        <span class="mode-dark">主动献祭者深度病历</span>
-                    </h2>
-                    <button class="btn-outline" onclick="navTo('layer-detail')">返回上一层</button>
-                </div>
-
-                <div class="grid-2">
-                    <div class="report-section">
-                        <div class="report-title"><span class="mode-light">基础体征与履历</span><span class="mode-dark">肉体参数与动情阈值</span></div>
-                        <div class="report-data">
-                            <span class="mode-light">身高 168cm | 体重 52kg<br>心肺功能优秀，作息极度规律 (06:00-23:00)。<br>客户信用评分：SSS级。</span>
-                            <span class="mode-dark">三围 88-60-90 | 动情阈值：极低。<br>敏感带：大腿根部内侧（极易因摩擦产生痉挛）、后颈。<br>受虐倾向：重度依赖精神施压。</span>
+        <!-- 层级4：监控台 -->
+        <div class="view-layer" id="layer-monitor">
+            <div class="card" style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 8px;">实时连接状态</div>
+                <h1 style="color: var(--accent); font-size: 32px; margin-bottom: 30px;">
+                    <span class="mode-light">沉浸专注中</span>
+                    <span class="mode-dark">理智濒临崩溃</span>
+                </h1>
+                
+                <div class="detail-grid" style="margin-top: 0; text-align: left;">
+                    <div class="detail-box">
+                        <div style="font-size: 14px; color: var(--text-sub);">心率监控</div>
+                        <div style="font-size: 36px; font-weight: 900; color: var(--text-main); margin: 10px 0;">
+                            <span class="mode-light">72</span><span class="mode-dark" style="color: var(--accent);">148</span> <span style="font-size: 16px; font-weight: normal;">bpm</span>
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-sub);">
+                            <span class="mode-light">呼吸平稳，状态极佳。</span>
+                            <span class="mode-dark">心动过速，阴道处于高频痉挛状态。</span>
                         </div>
                     </div>
-                    <div class="report-section">
-                        <div class="report-title"><span class="mode-light">性格与心理评估</span><span class="mode-dark">病理监控与榨取机制</span></div>
-                        <div class="report-data">
-                            <span class="mode-light">抗压能力极强，情绪极其稳定。在任何场合都能保持得体，极度自律。0差评雇主。</span>
-                            <span class="mode-dark">长期维持完美人设导致重度压抑。在公众场合，阴道壁会产生不受控的痉挛收缩，极易因恐慌大量分泌淫液。你越无视她，她含弄吞咽的动作越黏腻深透。</span>
+                    <div class="detail-box">
+                        <div style="font-size: 14px; color: var(--text-sub);">行为分析</div>
+                        <div style="font-size: 24px; font-weight: 900; color: var(--text-main); margin: 10px 0;">
+                            <span class="mode-light">效率 98%</span><span class="mode-dark" style="color: var(--accent);">重度榨取</span>
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-sub);">
+                            <span class="mode-light">正在认真做笔记。</span>
+                            <span class="mode-dark">正死死咬住下唇，用黏腻的吞咽宣泄慌乱。</span>
                         </div>
                     </div>
                 </div>
-
-                <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); text-align: right;">
-                    <button class="btn-primary" style="font-size: 16px; padding: 14px 32px;" onclick="acceptOrder()">
-                        <i class="fas fa-check-circle"></i> 
-                        <span class="mode-light">签署契约并接单</span>
-                        <span class="mode-dark">建立同频并赴约</span>
-                    </button>
+                
+                <div style="margin-top: 40px; color: var(--text-sub); font-size: 14px;">
+                    <i class="fas fa-info-circle"></i> 同频已建立，请在酒馆聊天框发送接单指令以推进剧情。
                 </div>
             </div>
         </div>
@@ -252,63 +306,62 @@ body { background: var(--bg-base); color: var(--text-main); display: flex; heigh
 </main>
 
 <script>
-    // 主题切换逻辑
+    // 主题切换
     const body = document.body;
     document.getElementById('themeToggleBtn').addEventListener('click', () => {
         body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
     });
 
-    // 视图导航逻辑 (第一层 -> 第二层 -> 第三层)
-    function navTo(layerId) {
+    // 导航与面包屑逻辑
+    const breadcrumb = document.getElementById('breadcrumb');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    function navTo(layerId, title) {
         document.querySelectorAll('.view-layer').forEach(el => el.classList.remove('active'));
         document.getElementById(layerId).classList.add('active');
         
-        // 更新面包屑和刷新按钮显隐
-        const breadcrumb = document.getElementById('breadcrumb');
-        const refreshBtn = document.getElementById('refreshBtn');
+        // 侧边栏高亮处理
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        if(layerId === 'layer-market' || layerId.startsWith('layer-')) {
+            if(layerId === 'layer-monitor') {
+                document.getElementById('nav-monitor').classList.add('active');
+            } else {
+                document.getElementById('nav-market').classList.add('active');
+            }
+        }
+
+        // 面包屑和刷新按钮逻辑
         if(layerId === 'layer-market') {
-            breadcrumb.innerHTML = `<span class="current mode-light">悬赏大厅</span><span class="current mode-dark">猎物雷达</span>`;
+            breadcrumb.innerHTML = `<span class="current">悬赏大厅</span>`;
             refreshBtn.style.display = 'inline-block';
-        } else if(layerId === 'layer-detail') {
-            breadcrumb.innerHTML = `<span style="cursor:pointer" onclick="navTo('layer-market')">大厅</span> / <span class="current">基础档案</span>`;
+        } else if(layerId === 'layer-directory') {
+            breadcrumb.innerHTML = `<span onclick="navTo('layer-market', '悬赏大厅')">悬赏大厅</span> / <span class="current">订单目录</span>`;
             refreshBtn.style.display = 'none';
-        } else if(layerId === 'layer-report') {
-            breadcrumb.innerHTML = `<span style="cursor:pointer" onclick="navTo('layer-market')">大厅</span> / <span style="cursor:pointer" onclick="navTo('layer-detail')">基础档案</span> / <span class="current">详细报告</span>`;
+        } else if(layerId === 'layer-monitor') {
+            breadcrumb.innerHTML = `<span class="current">服务监控</span>`;
+            refreshBtn.style.display = 'none';
+        } else {
+            // 三个详情页
+            breadcrumb.innerHTML = `<span onclick="navTo('layer-market', '悬赏大厅')">悬赏大厅</span> / <span onclick="navTo('layer-directory', '订单目录')">订单目录</span> / <span class="current">${title}</span>`;
             refreshBtn.style.display = 'none';
         }
     }
 
-    // 打开第二层
-    function openOrderDetails() { navTo('layer-detail'); }
-    // 打开第三层
-    function openDeepReport() { navTo('layer-report'); }
-
-    // Tab 切换逻辑 (第二层内)
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        event.target.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-    }
-
-    // 刷新雷达动画
     function refreshRadar() {
         const icon = document.querySelector('#refreshBtn i');
         icon.classList.add('spin');
         setTimeout(() => { icon.classList.remove('spin'); }, 1000);
     }
 
-    // 接单逻辑 (联动酒馆)
     function acceptOrder() {
-        // 这里生成一个接单指令，方便用户复制后发给AI触发剧情
-        const command = "【系统提示：已接单】确认赴约市图书馆。雇主已就位，进入高危监控模式。";
-        
-        // 尝试写入剪贴板
+        const command = "【系统提示：契约已签署】已抵达市图书馆长桌。雇主已就位，规则怪谈生效，进入高危监控模式。";
         navigator.clipboard.writeText(command).then(() => {
-            alert(body.getAttribute('data-theme') === 'dark' 
-                ? "同频已建立！已复制触发词，请直接在酒馆聊天框粘贴发送开始实战。" 
-                : "预约已接受！已复制确认文本，请发送给客户。");
+            navTo('layer-monitor', '服务监控');
+            setTimeout(() => {
+                alert("同频已建立！已复制触发词，请直接在酒馆聊天框粘贴发送开始实战。");
+            }, 300);
         }).catch(err => {
+            navTo('layer-monitor', '服务监控');
             alert("接单成功！请手动在聊天框输入接单指令。");
         });
     }
