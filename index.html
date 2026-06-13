@@ -10,7 +10,7 @@ body { margin: 0; background: transparent; display: flex; justify-content: cente
 .dw-mobile-wrap {
     width: 100%;
     max-width: 420px;
-    height: 600px; /* 固定高度模拟手机 */
+    height: 600px; 
     background: #0b0b0e;
     border: 1px solid #331118;
     border-radius: 20px;
@@ -52,6 +52,7 @@ body { margin: 0; background: transparent; display: flex; justify-content: cente
     padding: 10px 15px;
     border-bottom: 1px solid #222;
     overflow-x: auto;
+    transition: opacity 0.3s;
 }
 .dw-filter-item {
     font-size: 13px;
@@ -120,7 +121,7 @@ body { margin: 0; background: transparent; display: flex; justify-content: cente
     border-top: 1px solid #331118; padding: 10px 0; font-size: 12px;
 }
 .dw-nav-item { color: #666; text-align: center; cursor: pointer; transition: color 0.2s;}
-.dw-nav-active { color: #ff3366; font-weight: bold; }
+.dw-nav-active { color: #ff3366; font-weight: bold; text-shadow: 0 0 8px rgba(255, 51, 102, 0.6); }
 </style>
 </head>
 <body>
@@ -174,30 +175,74 @@ body { margin: 0; background: transparent; display: flex; justify-content: cente
 
     <!-- 底部导航 -->
     <div class="dw-bottom-nav">
-        <div class="dw-nav-item dw-nav-active"><div style="font-size: 18px;">👁️</div>大厅</div>
-        <div class="dw-nav-item"><div style="font-size: 18px;">🔗</div>记录</div>
-        <div class="dw-nav-item"><div style="font-size: 18px;">🩸</div>权限</div>
+        <div class="dw-nav-item dw-nav-active" data-index="0"><div style="font-size: 18px;">👁️</div>大厅</div>
+        <div class="dw-nav-item" data-index="1"><div style="font-size: 18px;">🔗</div>记录</div>
+        <div class="dw-nav-item" data-index="2"><div style="font-size: 18px;">🩸</div>权限</div>
     </div>
 </div>
 
 <script>
-    // 简单的标签切换与列表刷新动画逻辑
     const filters = document.querySelectorAll('.dw-filter-item');
+    const navItems = document.querySelectorAll('.dw-nav-item');
     const listContainer = document.getElementById('listContainer');
+    const filterBar = document.getElementById('filterBar');
+    
+    // 缓存大厅的 HTML 内容，方便切回来
+    const hallContent = listContainer.innerHTML;
 
+    // 顶部标签切换逻辑
     filters.forEach(item => {
         item.addEventListener('click', function() {
-            // 移除所有高亮
             filters.forEach(el => el.classList.remove('dw-filter-active'));
-            // 给当前点击的加上高亮
             this.classList.add('dw-filter-active');
             
-            // 列表闪烁动画，模拟加载数据
             listContainer.style.opacity = 0;
             setTimeout(() => {
-                // 这里把列表顺序倒一下，假装数据更新了
                 for (let i = listContainer.children.length; i >= 0; i--) {
                     listContainer.appendChild(listContainer.children[Math.random() * i | 0]);
+                }
+                listContainer.style.opacity = 1;
+            }, 300);
+        });
+    });
+
+    // 底部导航切换逻辑
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // 切换高亮
+            navItems.forEach(el => el.classList.remove('dw-nav-active'));
+            this.classList.add('dw-nav-active');
+
+            const index = this.getAttribute('data-index');
+            
+            // 渐隐动画
+            listContainer.style.opacity = 0;
+            if (index !== "0") filterBar.style.opacity = 0;
+
+            setTimeout(() => {
+                if (index === "0") {
+                    // 切回大厅
+                    filterBar.style.display = 'flex';
+                    filterBar.style.opacity = 1;
+                    listContainer.innerHTML = hallContent;
+                } else if (index === "1") {
+                    // 记录页
+                    filterBar.style.display = 'none';
+                    listContainer.innerHTML = `
+                        <div style="text-align:center; padding-top:60px; color:#555;">
+                            <div style="font-size:40px; margin-bottom:10px;">📭</div>
+                            <div>暂无同频记录...</div>
+                            <div style="font-size:12px; margin-top:5px;">等待猎物彻底沦陷</div>
+                        </div>`;
+                } else if (index === "2") {
+                    // 权限页
+                    filterBar.style.display = 'none';
+                    listContainer.innerHTML = `
+                        <div style="text-align:center; padding-top:60px; color:#ff3366;">
+                            <div style="font-size:40px; margin-bottom:10px;">⚠️</div>
+                            <div style="font-weight:bold;">[ 权限等级：观察者 ]</div>
+                            <div style="font-size:12px; color:#666; margin-top:5px;">深渊高级功能未解锁，请继续积累同频消耗。</div>
+                        </div>`;
                 }
                 listContainer.style.opacity = 1;
             }, 300);
