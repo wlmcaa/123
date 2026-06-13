@@ -2,293 +2,315 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>知己 Companion / 沉沦同频</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知己 Companion / 沉沦同频 监控终端</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* === 基础变量与柔和护眼主题 === */
+/* === 护眼主题变量 === */
 :root {
-    /* 亮色模式 (社交伪装) - 羊皮纸暖白，降低对比度 */
-    --bg-primary: #F5F5F7;
-    --bg-header: #FFFFFF;
-    --bg-card: #FFFFFF;
-    --text-main: #3A3A44;
-    --text-sub: #8E8E9F;
-    --accent-color: #E6A800;
-    --accent-gradient: linear-gradient(135deg, #FFD000 0%, #F5A623 100%);
-    --shadow: 0 8px 24px rgba(142, 142, 159, 0.12);
-    --border: #EAEAEA;
-    --tag-bg: #FFF8E1;
-    --tag-text: #D48806;
+    /* 亮色 (社交伪装) - 羊皮纸暖白 */
+    --bg-base: #F0F0F4;
+    --bg-panel: #FFFFFF;
+    --bg-hover: #F8F9FA;
+    --text-main: #33333E;
+    --text-sub: #7A7A8C;
+    --accent: #D48806;
+    --accent-light: #FFF8E1;
+    --border: #E5E5EB;
+    --shadow: 0 8px 30px rgba(0,0,0,0.04);
 }
 
 [data-theme="dark"] {
-    /* 暗色模式 (共犯解码) - 深渊灰紫，避免死黑 */
-    --bg-primary: #16161A;
-    --bg-header: #1C1C22;
-    --bg-card: #22222A;
+    /* 暗色 (共犯解码) - 深渊灰紫 */
+    --bg-base: #121216;
+    --bg-panel: #1A1A22;
+    --bg-hover: #22222C;
     --text-main: #D1D1E0;
-    --text-sub: #7A7A8C;
-    --accent-color: #FF4D6D;
-    --accent-gradient: linear-gradient(135deg, #FF4D6D 0%, #C9184A 100%);
-    --shadow: 0 8px 30px rgba(201, 24, 74, 0.15);
-    --border: #2D2D38;
-    --tag-bg: #3B1B22;
-    --tag-text: #FF8FA3;
+    --text-sub: #858599;
+    --accent: #FF4D6D;
+    --accent-light: #3B1B22;
+    --border: #2A2A35;
+    --shadow: 0 8px 40px rgba(255, 77, 109, 0.08);
 }
 
-/* === 全局样式与平滑过渡 === */
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
-body { 
-    background: transparent; 
-    display: flex; 
-    justify-content: center; 
-    padding: 15px 0; 
-}
+/* === 全局与大屏布局 === */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', sans-serif; }
+body { background: var(--bg-base); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; transition: all 0.6s ease; }
 
-/* 手机壳容器 - 加入 0.6s 慢缓动 */
-.app-container {
-    width: 100%; max-width: 420px; height: 650px; 
-    background: var(--bg-primary); color: var(--text-main);
-    display: flex; flex-direction: column; position: relative;
-    transition: background-color 0.6s ease, color 0.6s ease, box-shadow 0.6s ease;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2); 
-    border-radius: 16px; overflow: hidden; border: 1px solid var(--border);
-}
-
-/* === 表里世界切换核心 CSS === */
+/* 显隐逻辑 */
 .mode-dark { display: none; }
 [data-theme="dark"] .mode-light { display: none; }
-[data-theme="dark"] .mode-dark { display: inline-block; animation: textFade 0.4s ease; }
-[data-theme="light"] .mode-light { display: inline-block; animation: textFade 0.4s ease; }
+[data-theme="dark"] .mode-dark { display: inline-block; animation: fadeIn 0.4s ease; }
+[data-theme="light"] .mode-light { display: inline-block; animation: fadeIn 0.4s ease; }
 [data-theme="dark"] div.mode-dark { display: block; }
 [data-theme="light"] div.mode-light { display: block; }
-[data-theme="dark"] span.mode-dark { display: inline; }
-[data-theme="light"] span.mode-light { display: inline; }
-@keyframes textFade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
 
-/* === 头部 === */
-.header {
-    padding: 20px 16px 15px; background: var(--bg-header); display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid var(--border); transition: all 0.6s ease; flex-shrink: 0;
-}
-.header-title { font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-.header-title i { color: var(--accent-color); transition: color 0.6s ease; }
-.theme-toggle {
-    background: var(--tag-bg); color: var(--accent-color); border: none; padding: 8px 12px;
-    border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.6s ease;
-    display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow);
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-/* === 视图区域 === */
-.view-container { flex: 1; overflow-y: auto; padding: 16px; scrollbar-width: none; }
-.view-container::-webkit-scrollbar { display: none; }
-.view { display: none; animation: fadeIn 0.4s ease; }
-.view.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* === 左侧侧边栏 === */
+.sidebar { width: 260px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; transition: all 0.6s ease; z-index: 10; }
+.brand { font-size: 20px; font-weight: 900; margin-bottom: 40px; padding: 0 12px; display: flex; align-items: center; gap: 10px; }
+.brand i { color: var(--accent); font-size: 24px; transition: color 0.6s; }
+.nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.nav-item { padding: 14px 16px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: bold; color: var(--text-sub); transition: all 0.3s; }
+.nav-item:hover { background: var(--bg-hover); color: var(--text-main); }
+.nav-item.active { background: var(--accent-light); color: var(--accent); }
+.theme-btn { margin-top: auto; padding: 14px; border-radius: 12px; background: var(--bg-hover); border: 1px solid var(--border); color: var(--text-main); font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.6s; }
 
-/* === 通用卡片 === */
-.card { background: var(--bg-card); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: all 0.6s ease; }
-.card-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.card-title i { color: var(--accent-color); transition: color 0.6s ease; }
+/* === 右侧主内容区 === */
+.main-content { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.top-bar { height: 70px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-panel); transition: all 0.6s; }
+.breadcrumb { font-size: 16px; font-weight: bold; color: var(--text-sub); display: flex; align-items: center; gap: 8px; }
+.breadcrumb span.current { color: var(--text-main); }
+.view-area { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
 
-/* === 子页面 Tab 样式 === */
-.tab-nav { display: flex; background: var(--bg-primary); border-radius: 12px; padding: 4px; margin-bottom: 16px; transition: background 0.6s ease; }
-.tab-btn { flex: 1; text-align: center; padding: 8px 0; font-size: 13px; font-weight: bold; color: var(--text-sub); cursor: pointer; border-radius: 8px; transition: all 0.3s; }
-.tab-btn.active { background: var(--bg-card); color: var(--accent-color); box-shadow: var(--shadow); }
-.tab-content { display: none; font-size: 13px; color: var(--text-sub); line-height: 1.7; animation: fadeIn 0.3s ease; }
-.tab-content.active { display: block; }
-.tab-content strong { color: var(--text-main); display: block; margin-bottom: 4px; margin-top: 8px; transition: color 0.6s ease; }
+/* === 视图层级控制 === */
+.view-layer { display: none; animation: fadeIn 0.4s ease; }
+.view-layer.active { display: block; }
 
-/* === 其他通用元素 === */
-.slogan-title { font-size: 24px; font-weight: 900; background: var(--accent-gradient); -webkit-background-clip: text; color: transparent; margin-bottom: 8px; text-align: center; }
-.slogan-sub { font-size: 14px; color: var(--text-sub); text-align: center; margin-bottom: 20px;}
-.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.tag { background: var(--tag-bg); color: var(--tag-text); font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: bold; transition: all 0.6s ease; }
-.action-btn { width: 100%; background: var(--accent-gradient); color: #fff; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; box-shadow: var(--shadow); transition: all 0.3s ease; }
-.action-btn:active { transform: scale(0.98); }
+/* === UI 组件 === */
+.card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); transition: all 0.6s; margin-bottom: 24px; }
+.btn-primary { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+.btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+.btn-outline:hover { background: var(--accent-light); }
 
-/* === 底部导航 === */
-.bottom-nav { display: flex; background: var(--bg-header); border-top: 1px solid var(--border); padding: 10px 0; flex-shrink: 0; transition: all 0.6s ease; }
-.nav-item { flex: 1; text-align: center; color: var(--text-sub); font-size: 12px; cursor: pointer; transition: all 0.3s; }
-.nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
-.nav-item.active { color: var(--accent-color); font-weight: bold; }
+/* 标签与网格 */
+.tag { background: var(--accent-light); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-right: 8px; display: inline-block; transition: all 0.6s; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+/* 订单列表卡片 (第一层) */
+.order-card { cursor: pointer; border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: all 0.3s; background: var(--bg-panel); }
+.order-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow); }
+.order-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; }
+
+/* Tab 导航 (第二层) */
+.tab-nav { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+.tab-btn { padding: 12px 24px; font-weight: bold; color: var(--text-sub); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { display: none; line-height: 1.8; color: var(--text-main); font-size: 15px; }
+.tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+/* 详细报告单 (第三层) */
+.report-section { background: var(--bg-hover); border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--accent); transition: all 0.6s; }
+.report-title { font-size: 14px; color: var(--text-sub); margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+.report-data { font-size: 16px; font-weight: 500; }
+
+/* 刷新动画 */
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body data-theme="light">
 
-<div class="app-container">
-    <!-- 头部 -->
-    <div class="header">
-        <div class="header-title">
-            <i class="mode-light fas fa-leaf"></i><span class="mode-light">知己 Companion</span>
-            <i class="mode-dark fas fa-eye"></i><span class="mode-dark">沉沦同频</span>
+<!-- 左侧边栏 -->
+<aside class="sidebar">
+    <div class="brand">
+        <i class="mode-light fas fa-leaf"></i><i class="mode-dark fas fa-eye"></i>
+        <span class="mode-light">知己终端</span><span class="mode-dark">同频中枢</span>
+    </div>
+    <div class="nav-menu">
+        <div class="nav-item active" onclick="navTo('layer-market')">
+            <i class="fas fa-list-alt"></i>
+            <span class="mode-light">悬赏大厅</span><span class="mode-dark">猎物雷达</span>
         </div>
-        <button class="theme-toggle" id="themeToggleBtn">
-            <i class="mode-light fas fa-sun"></i><span class="mode-light">社交伪装</span>
-            <i class="mode-dark fas fa-moon"></i><span class="mode-dark">共犯解码</span>
-        </button>
+        <div class="nav-item" onclick="alert('监控模块待激活')">
+            <i class="fas fa-desktop"></i>
+            <span class="mode-light">服务监控</span><span class="mode-dark">实况截获</span>
+        </div>
+    </div>
+    <button class="theme-btn" id="themeToggleBtn">
+        <i class="mode-light fas fa-moon"></i><span class="mode-light">切换共犯视角</span>
+        <i class="mode-dark fas fa-sun"></i><span class="mode-dark">恢复社交伪装</span>
+    </button>
+</aside>
+
+<!-- 右侧主区 -->
+<main class="main-content">
+    <div class="top-bar">
+        <div class="breadcrumb" id="breadcrumb">
+            <span class="current mode-light">悬赏大厅</span>
+            <span class="current mode-dark">猎物雷达</span>
+        </div>
+        <div class="actions">
+            <!-- 仅在第一层显示刷新按钮 -->
+            <button class="btn-outline" id="refreshBtn" onclick="refreshRadar()">
+                <i class="fas fa-sync-alt"></i> <span class="mode-light">刷新订单</span><span class="mode-dark">重新扫描</span>
+            </button>
+        </div>
     </div>
 
-    <!-- 视图区域 -->
-    <div class="view-container">
+    <div class="view-area">
         
-        <!-- 1. 首页视图 -->
-        <div class="view active" id="view-home">
-            <div class="slogan-title mode-light" style="margin-top: 10px;">知己陪伴 共同成长</div>
-            <div class="slogan-title mode-dark" style="margin-top: 10px;">撕下伪装 主动献祭</div>
-            <div class="slogan-sub mode-light">为您匹配最优质的场景陪伴服务</div>
-            <div class="slogan-sub mode-dark">截获她压抑不住的隐秘侍弄欲...</div>
-
-            <div class="card">
-                <div class="card-title"><i class="fas fa-th-large"></i> 服务专区</div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
-                    <div style="cursor: pointer;" onclick="switchView('view-discover')">
-                        <div style="width: 50px; height: 50px; border-radius: 16px; background: var(--tag-bg); color: var(--accent-color); font-size: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; transition: all 0.6s ease;">
-                            <i class="fas fa-book-reader mode-light"></i><i class="fas fa-user-ninja mode-dark"></i>
-                        </div>
-                        <span style="font-size: 12px; font-weight: bold;" class="mode-light">陪看书</span>
-                        <span style="font-size: 12px; font-weight: bold;" class="mode-dark">视觉死角</span>
+        <!-- 第一层：订单列表 -->
+        <div class="view-layer active" id="layer-market">
+            <div class="grid-3">
+                <!-- 订单卡片 1 -->
+                <div class="order-card" onclick="openOrderDetails()">
+                    <div class="order-title">
+                        <span class="mode-light">市图书馆共学陪伴</span>
+                        <span class="mode-dark">长桌下的隐忍者</span>
                     </div>
+                    <div style="margin-bottom: 16px;">
+                        <span class="tag mode-light">黑钻客户</span><span class="tag mode-light">极度严苛</span>
+                        <span class="tag mode-dark">高危环境</span><span class="tag mode-dark">主动献祭</span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-sub); line-height: 1.6;">
+                        <span class="mode-light">雇主要求：保持绝对安静，禁止闲聊与肢体接触，违者直接终止订单。</span>
+                        <span class="mode-dark">真实诉求：花重金买你在大庭广众下无视她，好让她在桌下毫无底线地榨取你。</span>
+                    </div>
+                </div>
+                <!-- 占位卡片 -->
+                <div class="order-card" style="opacity: 0.5;">
+                    <div class="order-title">高端晚宴男伴</div>
+                    <div style="font-size: 13px; color: var(--text-sub);">[其他悬赏加密中...]</div>
                 </div>
             </div>
         </div>
 
-        <!-- 2. 发现/订单接头视图 (含 Tab) -->
-        <div class="view" id="view-discover">
+        <!-- 第二层：订单基础档案 (带Tab) -->
+        <div class="view-layer" id="layer-detail">
             <div class="card">
-                <h3 style="margin-bottom: 12px; font-size: 18px;">
-                    <span class="mode-light">市图书馆沉浸式共学</span>
-                    <span class="mode-dark">长桌下的隐忍者</span>
-                </h3>
-                <div class="tag-list">
-                    <span class="tag mode-light">保持安静</span><span class="tag mode-light">全神贯注</span>
-                    <span class="tag mode-dark">隐忍型</span><span class="tag mode-dark">极度紧绷</span><span class="tag mode-dark">主动榨取</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2>
+                        <span class="mode-light">悬赏档案：市图书馆共学</span>
+                        <span class="mode-dark">猎物锁定：长桌下的隐忍者</span>
+                    </h2>
+                    <button class="btn-outline" onclick="navTo('layer-market')">返回大厅</button>
                 </div>
 
-                <!-- 内部 Tab 导航 -->
                 <div class="tab-nav">
-                    <div class="tab-btn active" onclick="switchTab('tab-profile')">人物档案</div>
-                    <div class="tab-btn" onclick="switchTab('tab-scene')">环境勘测</div>
-                    <div class="tab-btn" onclick="switchTab('tab-terms')">契约边界</div>
+                    <div class="tab-btn active" onclick="switchTab('tab-profile')">雇主画像</div>
+                    <div class="tab-btn" onclick="switchTab('tab-scene')">环境评估</div>
+                    <div class="tab-btn" onclick="switchTab('tab-terms')">服务契约</div>
                 </div>
 
-                <!-- Tab 1: 人物档案 -->
                 <div class="tab-content active" id="tab-profile">
-                    <strong>身份履历</strong>
-                    <span class="mode-light">24岁，本校保研学姐。性格严谨，极重规矩，学术作风一丝不苟。在同学眼中是难以接近的高岭之花。</span>
-                    <span class="mode-dark">背德成瘾者。无法在常规的两性关系中获得快感。利用这套完美的社会面具，只为了能在随时身败名裂的紧绷感中，向你展现出反差最强烈的、毫无保留的主动侍弄。</span>
+                    <span class="mode-light">实名认证：法学院研二学生。完美主义者，对陪伴者的着装、谈吐有极高要求，履约记录100%极优。</span>
+                    <span class="mode-dark">背德成瘾者。常规性爱无法使其高潮，极度依赖“随时可能身败名裂”的紧绷感。</span>
                 </div>
-
-                <!-- Tab 2: 环境勘测 -->
                 <div class="tab-content" id="tab-scene">
-                    <strong>场景评估</strong>
-                    <span class="mode-light">市图书馆中庭长桌。绝对安静，人员密集，拥有极其优良的专注学习氛围。</span>
-                    <span class="mode-dark">高危刺激源。长桌对面坐着她的同班同学，巡馆员每15分钟经过一次。这些路人的脚步声是她的“兴奋剂”，会逼迫她因极度慌乱，而把桌下的含弄动作变得更加深透和黏腻。</span>
+                    <span class="mode-light">市图书馆中庭。绝对安静，学习氛围浓厚，人员密集。</span>
+                    <span class="mode-dark">高危刺激源。对面坐着同班同学，巡馆员定时经过。脚步声是她的兴奋剂。</span>
                 </div>
-
-                <!-- Tab 3: 契约边界 -->
                 <div class="tab-content" id="tab-terms">
-                    <strong>行为准则</strong>
-                    <span class="mode-light">1. 保持一米以上社交距离。<br>2. 严禁任何形式的肢体越界。<br>3. 以共同进步为唯一服务目的。</span>
-                    <span class="mode-dark">主动献祭法则：<br>1. 未经指令，她绝不停止桌下的榨取。<br>2. 当理智濒临崩溃时，允许她通过加重下体的绞紧力道来宣泄恐慌。<br>3. 所有的生理痉挛皆为她享受背德的证明，请安心享受她的侍弄。</span>
+                    <span class="mode-light">全程禁止闲聊，禁止任何肢体接触，违约不予结算。</span>
+                    <span class="mode-dark">主动献祭法则：未经指令绝不停止桌下的榨取。允许通过加重绞紧力道宣泄恐慌。</span>
                 </div>
-                
-                <button class="action-btn" onclick="switchView('view-service')">
-                    <span class="mode-light">接受预约</span>
-                    <span class="mode-dark">开启监控台实战</span>
-                </button>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="btn-primary" onclick="openDeepReport()">
+                        <i class="fas fa-fingerprint"></i> 
+                        <span class="mode-light">查看完整背调报告</span>
+                        <span class="mode-dark">解密极密体检底牌</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- 3. 服务/监控台视图 -->
-        <div class="view" id="view-service">
-            <div class="card" style="text-align: center;">
-                <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 4px;">当前实时状态</div>
-                <h2 style="color: var(--accent-color); margin-bottom: 16px; transition: color 0.6s ease;">
-                    <span class="mode-light">专注阅读中</span>
-                    <span class="mode-dark">理智摇摇欲坠</span>
-                </h2>
-                
-                <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                    <div style="flex: 1; background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.6s ease;">
-                        <div style="font-size: 12px; color: var(--text-sub);"><span class="mode-light">心率平稳</span><span class="mode-dark">真实心率</span></div>
-                        <div style="font-size: 20px; font-weight: 900; color: var(--accent-color); margin-top: 4px; transition: color 0.6s ease;">
-                            <span class="mode-light">72</span><span class="mode-dark">142</span> <span style="font-size: 12px;">bpm</span>
-                        </div>
-                    </div>
-                    <div style="flex: 1; background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.6s ease;">
-                        <div style="font-size: 12px; color: var(--text-sub);"><span class="mode-light">专注度</span><span class="mode-dark">侍弄状态</span></div>
-                        <div style="font-size: 16px; font-weight: 900; color: var(--accent-color); margin-top: 8px; transition: color 0.6s ease;">
-                            <span class="mode-light">98%</span><span class="mode-dark">极度淫靡</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <!-- 第三层：极密详细报告 -->
+        <div class="view-layer" id="layer-report">
             <div class="card">
-                <div class="card-title"><i class="mode-light fas fa-tshirt"></i><i class="mode-dark fas fa-video"></i><span class="mode-light">现场纪实</span><span class="mode-dark">越界实况</span></div>
-                <div style="background: var(--bg-primary); border-left: 4px solid var(--accent-color); padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; transition: all 0.6s ease;">
-                    <span class="mode-light">得体的学院风百褶裙与白衬衫，坐姿端正。一直在认真做笔记，偶尔抬头确认周围的学习氛围。</span>
-                    <span class="mode-dark">路人的脚步声越近，她的腰肢扭动得越发疯狂黏腻。死死咬住下唇不让自己出声，只能把所有的慌乱转化成下体不断收缩绞紧的力道，拼命榨取着你。</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="color: var(--accent);">
+                        <i class="fas fa-file-contract"></i> 
+                        <span class="mode-light">高净值客户详细背调</span>
+                        <span class="mode-dark">主动献祭者深度病历</span>
+                    </h2>
+                    <button class="btn-outline" onclick="navTo('layer-detail')">返回上一层</button>
                 </div>
 
-                <div class="card-title"><i class="mode-light fas fa-comment-dots"></i><i class="mode-dark fas fa-brain"></i><span class="mode-light">交流反馈</span><span class="mode-dark">脑波截获</span></div>
-                <div style="background: var(--bg-primary); border-left: 4px solid var(--accent-color); padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.6; font-style: italic; transition: all 0.6s ease;">
-                    <span class="mode-light">“这道题的解法很巧妙，谢谢你的指导，感觉效率提高了不少。”</span>
-                    <span class="mode-dark" style="color: #ff80ab;">“哈啊……有人走过来了……好刺激……请继续享受我的侍奉……就在这里把我填满吧……”</span>
+                <div class="grid-2">
+                    <div class="report-section">
+                        <div class="report-title"><span class="mode-light">基础体征与履历</span><span class="mode-dark">肉体参数与动情阈值</span></div>
+                        <div class="report-data">
+                            <span class="mode-light">身高 168cm | 体重 52kg<br>心肺功能优秀，作息极度规律 (06:00-23:00)。<br>客户信用评分：SSS级。</span>
+                            <span class="mode-dark">三围 88-60-90 | 动情阈值：极低。<br>敏感带：大腿根部内侧（极易因摩擦产生痉挛）、后颈。<br>受虐倾向：重度依赖精神施压。</span>
+                        </div>
+                    </div>
+                    <div class="report-section">
+                        <div class="report-title"><span class="mode-light">性格与心理评估</span><span class="mode-dark">病理监控与榨取机制</span></div>
+                        <div class="report-data">
+                            <span class="mode-light">抗压能力极强，情绪极其稳定。在任何场合都能保持得体，极度自律。0差评雇主。</span>
+                            <span class="mode-dark">长期维持完美人设导致重度压抑。在公众场合，阴道壁会产生不受控的痉挛收缩，极易因恐慌大量分泌淫液。你越无视她，她含弄吞咽的动作越黏腻深透。</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); text-align: right;">
+                    <button class="btn-primary" style="font-size: 16px; padding: 14px 32px;" onclick="acceptOrder()">
+                        <i class="fas fa-check-circle"></i> 
+                        <span class="mode-light">签署契约并接单</span>
+                        <span class="mode-dark">建立同频并赴约</span>
+                    </button>
                 </div>
             </div>
         </div>
 
     </div>
-
-    <!-- 底部导航 -->
-    <div class="bottom-nav">
-        <div class="nav-item active" data-target="view-home">
-            <i class="fas fa-home"></i><span class="mode-light">首页</span><span class="mode-dark">大厅</span>
-        </div>
-        <div class="nav-item" data-target="view-discover">
-            <i class="fas fa-compass"></i><span class="mode-light">发现</span><span class="mode-dark">截获</span>
-        </div>
-        <div class="nav-item" data-target="view-service">
-            <i class="fas fa-chart-bar"></i><span class="mode-light">进度</span><span class="mode-dark">监控</span>
-        </div>
-    </div>
-</div>
+</main>
 
 <script>
-    // 切换亮/暗色模式逻辑
+    // 主题切换逻辑
     const body = document.body;
-    const themeBtn = document.getElementById('themeToggleBtn');
-    
-    themeBtn.addEventListener('click', () => {
-        if (body.getAttribute('data-theme') === 'light') {
-            body.setAttribute('data-theme', 'dark');
-        } else {
-            body.setAttribute('data-theme', 'light');
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+
+    // 视图导航逻辑 (第一层 -> 第二层 -> 第三层)
+    function navTo(layerId) {
+        document.querySelectorAll('.view-layer').forEach(el => el.classList.remove('active'));
+        document.getElementById(layerId).classList.add('active');
+        
+        // 更新面包屑和刷新按钮显隐
+        const breadcrumb = document.getElementById('breadcrumb');
+        const refreshBtn = document.getElementById('refreshBtn');
+        if(layerId === 'layer-market') {
+            breadcrumb.innerHTML = `<span class="current mode-light">悬赏大厅</span><span class="current mode-dark">猎物雷达</span>`;
+            refreshBtn.style.display = 'inline-block';
+        } else if(layerId === 'layer-detail') {
+            breadcrumb.innerHTML = `<span style="cursor:pointer" onclick="navTo('layer-market')">大厅</span> / <span class="current">基础档案</span>`;
+            refreshBtn.style.display = 'none';
+        } else if(layerId === 'layer-report') {
+            breadcrumb.innerHTML = `<span style="cursor:pointer" onclick="navTo('layer-market')">大厅</span> / <span style="cursor:pointer" onclick="navTo('layer-detail')">基础档案</span> / <span class="current">详细报告</span>`;
+            refreshBtn.style.display = 'none';
         }
-    });
-
-    // 底部主导航切换逻辑
-    const navItems = document.querySelectorAll('.nav-item');
-    const views = document.querySelectorAll('.view');
-    function switchView(targetId) {
-        views.forEach(view => view.classList.remove('active'));
-        navItems.forEach(nav => nav.classList.remove('active'));
-        document.getElementById(targetId).classList.add('active');
-        document.querySelector(`.nav-item[data-target="${targetId}"]`).classList.add('active');
     }
-    navItems.forEach(item => {
-        item.addEventListener('click', () => { switchView(item.getAttribute('data-target')); });
-    });
 
-    // 内部 Tab 切换逻辑
+    // 打开第二层
+    function openOrderDetails() { navTo('layer-detail'); }
+    // 打开第三层
+    function openDeepReport() { navTo('layer-report'); }
+
+    // Tab 切换逻辑 (第二层内)
     function switchTab(tabId) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         event.target.classList.add('active');
         document.getElementById(tabId).classList.add('active');
+    }
+
+    // 刷新雷达动画
+    function refreshRadar() {
+        const icon = document.querySelector('#refreshBtn i');
+        icon.classList.add('spin');
+        setTimeout(() => { icon.classList.remove('spin'); }, 1000);
+    }
+
+    // 接单逻辑 (联动酒馆)
+    function acceptOrder() {
+        // 这里生成一个接单指令，方便用户复制后发给AI触发剧情
+        const command = "【系统提示：已接单】确认赴约市图书馆。雇主已就位，进入高危监控模式。";
+        
+        // 尝试写入剪贴板
+        navigator.clipboard.writeText(command).then(() => {
+            alert(body.getAttribute('data-theme') === 'dark' 
+                ? "同频已建立！已复制触发词，请直接在酒馆聊天框粘贴发送开始实战。" 
+                : "预约已接受！已复制确认文本，请发送给客户。");
+        }).catch(err => {
+            alert("接单成功！请手动在聊天框输入接单指令。");
+        });
     }
 </script>
 
